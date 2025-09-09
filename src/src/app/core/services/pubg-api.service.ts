@@ -3,8 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of, throwError, forkJoin, switchMap } from 'rxjs';
 import { map, catchError, retry } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-import { Player, Match, TelemetryEvent } from '../models';
-import { Shard } from '../models/ui.models';
+import { Player, Match, TelemetryEvent, Shard } from '../models';
 
 @Injectable({
   providedIn: 'root'
@@ -134,6 +133,17 @@ export class PubgApiService {
     );
   }
 
+  clearCache(): void {
+    this.cache.clear();
+  }
+
+  getCacheStats(): { size: number; keys: string[] } {
+    return {
+      size: this.cache.size,
+      keys: Array.from(this.cache.keys())
+    };
+  }
+
   private getPlayerByAccountId(playerId: string, shard: Shard): Observable<Player> {
     const url = `${this.baseUrl}/shards/${shard}/players/${playerId}`;
     
@@ -145,16 +155,5 @@ export class PubgApiService {
         return throwError(() => new Error(`Failed to fetch player by account ID: ${error.message}`));
       })
     );
-  }
-
-  clearCache(): void {
-    this.cache.clear();
-  }
-
-  getCacheStats(): { size: number; keys: string[] } {
-    return {
-      size: this.cache.size,
-      keys: Array.from(this.cache.keys())
-    };
   }
 }

@@ -4,7 +4,7 @@ import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MaterialModule } from './material.module';
-import { ChartsModule } from 'ng2-charts';
+import { NgChartsModule } from 'ng2-charts';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -36,7 +36,7 @@ import { TeamComparisonComponent } from './features/match-analysis/components/te
     FormsModule,
     ReactiveFormsModule,
     MaterialModule,
-    ChartsModule,
+    NgChartsModule,
     AppRoutingModule
   ],
   providers: [

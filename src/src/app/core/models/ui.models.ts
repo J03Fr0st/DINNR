@@ -66,18 +66,7 @@ export enum MapName {
   HAVEN = 'Haven'
 }
 
-export enum Shard {
-  PC_NA = 'pc-na',
-  PC_EU = 'pc-eu',
-  PC_AS = 'pc-as',
-  PC_KAKAO = 'pc-kakao',
-  PC_SEA = 'pc-sea',
-  PC_KRJP = 'pc-krjp',
-  PC_JP = 'pc-jp',
-  PC_OC = 'pc-oc',
-  PC_SA = 'pc-sa',
-  PC_RU = 'pc-ru'
-}
+// Shard is imported from pubg-ts types
 
 export enum PerformanceRating {
   EXCELLENT = 5,
@@ -120,7 +109,7 @@ export function formatTime(seconds: number): string {
   return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
 }
 
-export function calculateDistance(pos1: Vector3, pos2: Vector3): number {
+export function calculateDistance(pos1: { x: number; y: number; z: number }, pos2: { x: number; y: number; z: number }): number {
   return Math.sqrt(
     Math.pow(pos2.x - pos1.x, 2) +
     Math.pow(pos2.y - pos1.y, 2) +

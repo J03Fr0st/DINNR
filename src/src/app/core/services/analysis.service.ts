@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
-import { Observable, of, throwError } from 'rxjs';
+import { Observable, of, throwError, forkJoin } from 'rxjs';
 import { map, catchError, switchMap } from 'rxjs/operators';
 import { PubgApiService } from './pubg-api.service';
 import { TelemetryService } from './telemetry.service';
 import { MatchAnalysis, PlayerAnalysis, PlayerMatchStats, PlayerInsights } from '../models/analysis.models';
-import { MatchAnalysisForm, PlayerSearchForm, PlayerStats, MatchHistory } from '../models/ui.models';
-import { Shard } from '../models/ui.models';
+import { MatchAnalysisForm, PlayerSearchForm } from '../models/ui.models';
+import { Shard, Player, Match } from '../models';
 
 export interface PlayerStats {
   playerName: string;
@@ -104,7 +104,7 @@ export class AnalysisService {
     return this.getPlayerStats(form.playerName, form.shard);
   }
 
-  private calculatePlayerStats(player: any, matches: any[]): PlayerStats {
+  private calculatePlayerStats(player: Player, matches: Match[]): PlayerStats {
     const recentMatches = matches.slice(0, 10).map(match => ({
       matchId: match.id,
       date: match.attributes.createdAt,
@@ -138,7 +138,7 @@ export class AnalysisService {
     };
   }
 
-  private getPlacementFromMatch(match: any, playerId: string): number {
+  private getPlacementFromMatch(match: Match, playerId: string): number {
     const participant = match.relationships.participants.data.find((p: any) => {
       return match.included?.find((inc: any) => 
         inc.type === 'participant' && inc.id === p.id && inc.attributes.playerId === playerId
@@ -153,7 +153,7 @@ export class AnalysisService {
     return 0;
   }
 
-  private getKillsFromMatch(match: any, playerId: string): number {
+  private getKillsFromMatch(match: Match, playerId: string): number {
     const participant = match.relationships.participants.data.find((p: any) => {
       return match.included?.find((inc: any) => 
         inc.type === 'participant' && inc.id === p.id && inc.attributes.playerId === playerId
@@ -168,7 +168,7 @@ export class AnalysisService {
     return 0;
   }
 
-  private getDamageFromMatch(match: any, playerId: string): number {
+  private getDamageFromMatch(match: Match, playerId: string): number {
     const participant = match.relationships.participants.data.find((p: any) => {
       return match.included?.find((inc: any) => 
         inc.type === 'participant' && inc.id === p.id && inc.attributes.playerId === playerId
@@ -183,7 +183,7 @@ export class AnalysisService {
     return 0;
   }
 
-  private getSurvivalTimeFromMatch(match: any, playerId: string): number {
+  private getSurvivalTimeFromMatch(match: Match, playerId: string): number {
     const participant = match.relationships.participants.data.find((p: any) => {
       return match.included?.find((inc: any) => 
         inc.type === 'participant' && inc.id === p.id && inc.attributes.playerId === playerId

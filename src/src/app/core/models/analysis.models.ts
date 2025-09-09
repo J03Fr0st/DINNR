@@ -1,3 +1,5 @@
+import type { Match, Participant, Player } from '@j03fr0st/pubg-ts';
+
 export interface MatchAnalysis {
   matchId: string;
   analysisDate: string;
@@ -120,6 +122,6 @@ export interface TimelinePoint {
 export interface PlayerTimeline {
   time: number;
   event: string;
-  position?: Vector3;
+  position?: TelemetryLocation;
   details?: any;
 }

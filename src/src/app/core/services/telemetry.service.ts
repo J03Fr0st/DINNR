@@ -6,9 +6,8 @@ import {
   TelemetryEvent, 
   LogPlayerPosition, 
   LogPlayerKill, 
-  isPlayerKillEvent, 
-  isPlayerPositionEvent,
-  Vector3 
+  TelemetryLocation,
+  Match
 } from '../models';
 import { MatchAnalysis, PlayerAnalysis, PlayerMatchStats, PlayerInsights, MatchSummary, AnalysisInsights } from '../models/analysis.models';
 import { Shard } from '../models/ui.models';
@@ -76,26 +75,28 @@ export class TelemetryService {
   }
 
   private isPlayerEvent(event: TelemetryEvent, playerName: string): boolean {
-    if (isPlayerKillEvent(event)) {
-      return event.killer.name === playerName || event.victim.name === playerName;
+    if (event._T === 'LogPlayerKill') {
+      const killEvent = event as LogPlayerKill;
+      return killEvent.killer.name === playerName || killEvent.victim.name === playerName;
     }
-    if (isPlayerPositionEvent(event)) {
-      return event.character.name === playerName;
+    if (event._T === 'LogPlayerPosition') {
+      const positionEvent = event as LogPlayerPosition;
+      return positionEvent.character.name === playerName;
     }
     return false;
   }
 
   private calculatePlayerStats(events: TelemetryEvent[], playerName: string): PlayerMatchStats {
     const kills = events.filter(e => 
-      isPlayerKillEvent(e) && e.killer.name === playerName
+      e._T === 'LogPlayerKill' && (e as LogPlayerKill).killer.name === playerName
     ).length;
 
     const deaths = events.filter(e => 
-      isPlayerKillEvent(e) && e.victim.name === playerName
+      e._T === 'LogPlayerKill' && (e as LogPlayerKill).victim.name === playerName
     ).length;
 
     const killEvents = events.filter(e => 
-      isPlayerKillEvent(e) && e.killer.name === playerName
+      e._T === 'LogPlayerKill' && (e as LogPlayerKill).killer.name === playerName
     ) as LogPlayerKill[];
 
     const totalDamage = killEvents.reduce((sum, event) => sum + (event.victimGameResult.stats?.damageDealt || 0), 0);
@@ -137,7 +138,7 @@ export class TelemetryService {
 
   private calculateTotalDistance(events: TelemetryEvent[], playerName: string): number {
     const positionEvents = events.filter(e => 
-      isPlayerPositionEvent(e) && e.character.name === playerName
+      e._T === 'LogPlayerPosition' && (e as LogPlayerPosition).character.name === playerName
     ) as LogPlayerPosition[];
 
     let totalDistance = 0;
@@ -150,7 +151,7 @@ export class TelemetryService {
     return totalDistance;
   }
 
-  private calculateDistance(pos1: Vector3, pos2: Vector3): number {
+  private calculateDistance(pos1: TelemetryLocation, pos2: TelemetryLocation): number {
     return Math.sqrt(
       Math.pow(pos2.x - pos1.x, 2) +
       Math.pow(pos2.y - pos1.y, 2) +
@@ -158,23 +159,24 @@ export class TelemetryService {
     );
   }
 
-  private calculateSurvivalTime(events: TelemetryEvent[], playerName: number): number {
+  private calculateSurvivalTime(events: TelemetryEvent[], playerName: string): number {
     const playerEvents = events.filter(e => this.isPlayerEvent(e, playerName));
     if (playerEvents.length === 0) return 0;
 
     const firstEvent = playerEvents[0];
     const lastEvent = playerEvents[playerEvents.length - 1];
     
-    return (new Date(lastEvent.timestamp).getTime() - new Date(firstEvent.timestamp).getTime()) / 1000;
+    return (new Date(lastEvent._D).getTime() - new Date(firstEvent._D).getTime()) / 1000;
   }
 
   private getPlacement(events: TelemetryEvent[], playerName: string): number {
     const deathEvent = events.find(e => 
-      isPlayerKillEvent(e) && e.victim.name === playerName
+      e._T === 'LogPlayerKill' && (e as LogPlayerKill).victim.name === playerName
     );
     
-    if (deathEvent && isPlayerKillEvent(deathEvent)) {
-      return deathEvent.victimGameResult.stats?.winPlace || 0;
+    if (deathEvent && deathEvent._T === 'LogPlayerKill') {
+      const killEvent = deathEvent as LogPlayerKill;
+      return killEvent.victimGameResult.stats?.rank || 1;
     }
     
     return 1; // Survived to the end
@@ -238,21 +240,22 @@ export class TelemetryService {
 
   private createPlayerTimeline(events: TelemetryEvent[], playerName: string): any[] {
     return events.map(event => ({
-      time: new Date(event.timestamp).getTime(),
-      event: event.type,
-      position: isPlayerPositionEvent(event) ? event.character.location : undefined,
-      details: isPlayerKillEvent(event) ? {
-        killer: event.killer.name,
-        victim: event.victim.name,
-        weapon: event.damageCauserName,
-        distance: event.distance
+      time: new Date(event._D).getTime(),
+      event: event._T,
+      position: event._T === 'LogPlayerPosition' ? (event as LogPlayerPosition).character.location : undefined,
+      details: event._T === 'LogPlayerKill' ? {
+        killer: (event as LogPlayerKill).killer.name,
+        victim: (event as LogPlayerKill).victim.name,
+        weapon: (event as LogPlayerKill).damageCauserName,
+        distance: (event as LogPlayerKill).distance
       } : undefined
     }));
   }
 
-  private createMatchSummary(match: any, telemetry: TelemetryEvent[]): MatchSummary {
+  private createMatchSummary(match: Match, telemetry: TelemetryEvent[]): MatchSummary {
     const duration = match.attributes.duration;
-    const totalPlayers = telemetry.filter(e => e.type === 'LogMatchStart')[0]?.characters?.length || 100;
+    const matchStartEvent = telemetry.find(e => e._T === 'LogMatchStart') as any;
+    const totalPlayers = matchStartEvent?.characters?.length || 100;
     
     return {
       totalPlayers,
@@ -281,15 +284,18 @@ export class TelemetryService {
 
   private extractKeyMoments(telemetry: TelemetryEvent[]): any[] {
     return telemetry
-      .filter(e => isPlayerKillEvent(e))
+      .filter(e => e._T === 'LogPlayerKill')
       .slice(0, 10)
-      .map(event => ({
-        timestamp: new Date(event.timestamp).getTime(),
-        type: 'kill',
-        description: `${event.killer.name} eliminated ${event.victim.name}`,
-        impact: 5,
-        players: [event.killer.name, event.victim.name]
-      }));
+      .map(event => {
+        const killEvent = event as LogPlayerKill;
+        return {
+          timestamp: new Date(event._D).getTime(),
+          type: 'kill',
+          description: `${killEvent.killer.name} eliminated ${killEvent.victim.name}`,
+          impact: 5,
+          players: [killEvent.killer.name, killEvent.victim.name]
+        };
+      });
   }
 
   private generateStrategicInsights(playerAnalyses: PlayerAnalysis[]): string[] {
@@ -310,9 +316,10 @@ export class TelemetryService {
 
   private getPlayerId(events: TelemetryEvent[], playerName: string): string {
     const playerEvent = events.find(e => this.isPlayerEvent(e, playerName));
-    if (isPlayerKillEvent(playerEvent)) {
-      return playerEvent.killer.name === playerName ? 
-        playerEvent.killer.name : playerEvent.victim.name;
+    if (playerEvent && playerEvent._T === 'LogPlayerKill') {
+      const killEvent = playerEvent as LogPlayerKill;
+      return killEvent.killer.name === playerName ? 
+        killEvent.killer.accountId : killEvent.victim.accountId;
     }
     return playerName;
   }
