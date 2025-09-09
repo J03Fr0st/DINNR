@@ -1,0 +1,198 @@
+.player-stats-container {
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.players-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 24px;
+}
+
+.player-card {
+  background: #f5f5f5;
+  border-radius: 8px;
+  padding: 20px;
+  border: 1px solid #e0e0e0;
+}
+
+.player-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #ddd;
+}
+
+.player-header h3 {
+  margin: 0;
+  color: #333;
+  font-size: 1.2em;
+}
+
+.performance-rating {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 0.9em;
+  text-align: center;
+  min-width: 100px;
+}
+
+.performance-rating.green {
+  background-color: #4caf50;
+  color: white;
+}
+
+.performance-rating.orange {
+  background-color: #ff9800;
+  color: white;
+}
+
+.performance-rating.red {
+  background-color: #f44336;
+  color: white;
+}
+
+.rating-score {
+  display: block;
+  font-size: 0.8em;
+  opacity: 0.9;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 12px;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+}
+
+.stat-label {
+  display: block;
+  font-size: 0.8em;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.stat-value {
+  display: block;
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #333;
+}
+
+.stat-value.green {
+  color: #4caf50;
+}
+
+.stat-value.orange {
+  color: #ff9800;
+}
+
+.stat-value.yellow {
+  color: #ffc107;
+}
+
+.stat-value.red {
+  color: #f44336;
+}
+
+.weapon-stats {
+  margin-bottom: 24px;
+}
+
+.weapon-stats h4 {
+  margin: 0 0 12px 0;
+  color: #333;
+  font-size: 1em;
+}
+
+.weapons-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.weapon-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: white;
+  border-radius: 4px;
+  border: 1px solid #e0e0e0;
+}
+
+.weapon-name {
+  font-weight: 500;
+  color: #333;
+}
+
+.weapon-kills {
+  color: #4caf50;
+  font-weight: bold;
+}
+
+.weapon-damage {
+  color: #ff9800;
+  font-size: 0.9em;
+}
+
+.insights-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.insights-group h4 {
+  margin: 0 0 8px 0;
+  color: #333;
+  font-size: 1em;
+}
+
+mat-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+mat-chip {
+  font-size: 0.85em;
+}
+
+@media (max-width: 768px) {
+  .players-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .player-header {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .weapon-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "name": "dinnr",
+  "version": "1.0.0",
+  "description": "DINNR is a PUBG analytics platform that transforms raw telemetry into clear, actionable insights for faster improvement and smarter squad calls.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/J03Fr0st/DINNR.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/J03Fr0st/DINNR/issues"
+  },
+  "homepage": "https://github.com/J03Fr0st/DINNR#readme",
+  "devDependencies": {
+    "@angular-devkit/build-angular": "^17.3.17",
+    "@angular/cli": "^17.3.17",
+    "typescript": "^5.4.5"
+  }
+}

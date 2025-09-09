@@ -1,0 +1,92 @@
+<div class="match-input-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Match Analysis</mat-card-title>
+      <mat-card-subtitle>Enter match ID and player names to analyze PUBG match performance</mat-card-subtitle>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <form [formGroup]="matchForm" (ngSubmit)="onSubmit()">
+        <div class="form-field">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Match ID (GUID)</mat-label>
+            <input matInput formControlName="matchId" placeholder="e.g., 123e4567-e89b-12d3-a456-426614174000">
+            <mat-error *ngIf="matchForm.get('matchId')?.hasError('required')">
+              Match ID is required
+            </mat-error>
+            <mat-error *ngIf="matchForm.get('matchId')?.hasError('pattern')">
+              Please enter a valid GUID
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-field">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Player Names</mat-label>
+            <input matInput formControlName="playerNames" placeholder="e.g., Player1, Player2, Player3">
+            <mat-error *ngIf="matchForm.get('playerNames')?.hasError('required')">
+              At least one player name is required
+            </mat-error>
+            <mat-hint>Separate multiple player names with commas</mat-hint>
+          </mat-form-field>
+        </div>
+
+        <div class="form-field">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Shard/Region</mat-label>
+            <mat-select formControlName="shard">
+              <mat-option *ngFor="let shard of shards" [value]="shard">
+                {{ shard }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="form-actions">
+          <button mat-raised-button color="primary" type="submit" [disabled]="matchForm.invalid || loading">
+            <mat-icon>analytics</mat-icon>
+            Analyze Match
+          </button>
+          
+          <button mat-raised-button color="accent" type="button" (click)="resetForm()" [disabled]="loading">
+            <mat-icon>refresh</mat-icon>
+            Reset
+          </button>
+
+          <button mat-raised-button color="warn" type="button" (click)="exportAnalysis()" 
+                  [disabled]="!analysis || loading">
+            <mat-icon>download</mat-icon>
+            Export
+          </button>
+        </div>
+      </form>
+
+      <div *ngIf="loading" class="loading-container">
+        <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+        <p>Analyzing match data...</p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <div *ngIf="analysis" class="analysis-results">
+    <app-player-stats [players]="analysis.players"></app-player-stats>
+    <app-match-summary [summary]="analysis.matchSummary"></app-match-summary>
+    <app-insights [insights]="analysis.insights"></app-insights>
+    
+    <div class="charts-section">
+      <div class="chart-row">
+        <div class="chart-col">
+          <app-performance-chart [playerStats]="analysis.players"></app-performance-chart>
+        </div>
+        <div class="chart-col">
+          <app-team-comparison [players]="analysis.players"></app-team-comparison>
+        </div>
+      </div>
+      <div class="chart-row">
+        <div class="chart-col">
+          <app-kill-timeline [timelineData]="analysis.matchSummary.timeline"></app-kill-timeline>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

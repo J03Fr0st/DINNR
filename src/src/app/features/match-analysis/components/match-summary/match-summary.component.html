@@ -1,0 +1,93 @@
+<div class="match-summary-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Match Summary</mat-card-title>
+      <mat-card-subtitle>Overview of match details and results</mat-card-subtitle>
+    </mat-card-header>
+    
+    <mat-card-content *ngIf="summary">
+      <div class="summary-grid">
+        <div class="summary-item">
+          <mat-icon class="summary-icon">map</mat-icon>
+          <div class="summary-content">
+            <div class="summary-label">Map</div>
+            <div class="summary-value" [style.color]="getMapColor(summary.map)">
+              {{ summary.map }}
+            </div>
+          </div>
+        </div>
+
+        <div class="summary-item">
+          <mat-icon class="summary-icon">{{ getGameModeIcon(summary.gameMode) }}</mat-icon>
+          <div class="summary-content">
+            <div class="summary-label">Game Mode</div>
+            <div class="summary-value">{{ summary.gameMode.toUpperCase() }}</div>
+          </div>
+        </div>
+
+        <div class="summary-item">
+          <mat-icon class="summary-icon">timer</mat-icon>
+          <div class="summary-content">
+            <div class="summary-label">Duration</div>
+            <div class="summary-value">{{ formatTime(summary.matchDuration) }}</div>
+          </div>
+        </div>
+
+        <div class="summary-item">
+          <mat-icon class="summary-icon">groups</mat-icon>
+          <div class="summary-content">
+            <div class="summary-label">Total Players</div>
+            <div class="summary-value">{{ summary.totalPlayers }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline-section" *ngIf="summary.timeline && summary.timeline.length > 0">
+        <h3>Match Timeline</h3>
+        <div class="timeline-container">
+          <div class="timeline">
+            <div *ngFor="let point of summary.timeline; let i = index" class="timeline-point">
+              <div class="timeline-marker"></div>
+              <div class="timeline-content">
+                <div class="timeline-time">{{ formatTime(point.time) }}</div>
+                <div class="timeline-info">
+                  <span class="players-alive">{{ point.playersAlive }} players alive</span>
+                  <span class="zone-info">Zone: {{ point.zone.radius }}m</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="match-stats">
+        <h3>Match Statistics</h3>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-number">{{ summary.totalPlayers }}</div>
+            <div class="stat-label">Players Started</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">{{ formatTime(summary.matchDuration) }}</div>
+            <div class="stat-label">Match Duration</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">{{ summary.map }}</div>
+            <div class="stat-label">Battlefield</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">{{ summary.gameMode }}</div>
+            <div class="stat-label">Mode</div>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+
+    <mat-card-content *ngIf="!summary">
+      <div class="no-data">
+        <mat-icon>info</mat-icon>
+        <p>No match summary available</p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,0 +1,106 @@
+<div class="player-stats-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Player Statistics</mat-card-title>
+      <mat-card-subtitle>Detailed performance metrics for each player</mat-card-subtitle>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <div class="players-grid">
+        <div *ngFor="let player of players" class="player-card">
+          <div class="player-header">
+            <h3>{{ player.name }}</h3>
+            <div class="performance-rating" [ngClass]="getPerformanceColor(player.insights.performanceRating)">
+              {{ getPerformanceText(player.insights.performanceRating) }}
+              <span class="rating-score">{{ player.insights.performanceRating }}/5</span>
+            </div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-item">
+              <span class="stat-label">K/D Ratio</span>
+              <span class="stat-value" [ngClass]="getKDColor(player.stats.kills / (player.stats.deaths || 1))">
+                {{ (player.stats.kills / (player.stats.deaths || 1)).toFixed(2) }}
+              </span>
+            </div>
+            
+            <div class="stat-item">
+              <span class="stat-label">Kills</span>
+              <span class="stat-value">{{ player.stats.kills }}</span>
+            </div>
+            
+            <div class="stat-item">
+              <span class="stat-label">Deaths</span>
+              <span class="stat-value">{{ player.stats.deaths }}</span>
+            </div>
+            
+            <div class="stat-item">
+              <span class="stat-label">Placement</span>
+              <span class="stat-value">#{{ player.stats.placement }}</span>
+            </div>
+            
+            <div class="stat-item">
+              <span class="stat-label">Damage</span>
+              <span class="stat-value">{{ Math.round(player.stats.damageDealt) }}</span>
+            </div>
+            
+            <div class="stat-item">
+              <span class="stat-label">Survival Time</span>
+              <span class="stat-value">{{ formatTime(player.stats.survivalTime) }}</span>
+            </div>
+            
+            <div class="stat-item">
+              <span class="stat-label">Distance</span>
+              <span class="stat-value">{{ formatDistance(player.stats.movement.totalDistance) }}</span>
+            </div>
+            
+            <div class="stat-item">
+              <span class="stat-label">Headshot %</span>
+              <span class="stat-value">{{ (player.stats.combat.headshotPercentage * 100).toFixed(1) }}%</span>
+            </div>
+          </div>
+
+          <div class="weapon-stats" *ngIf="Object.keys(player.stats.weapons).length > 0">
+            <h4>Weapon Usage</h4>
+            <div class="weapons-list">
+              <div *ngFor="let weapon of Object.keys(player.stats.weapons) | keyvalue" class="weapon-item">
+                <span class="weapon-name">{{ weapon.key }}</span>
+                <span class="weapon-kills">{{ weapon.value.kills }} kills</span>
+                <span class="weapon-damage">{{ Math.round(weapon.value.damage) }} damage</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="insights-section">
+            <div class="insights-group" *ngIf="player.insights.strengths.length > 0">
+              <h4>Strengths</h4>
+              <mat-chip-list>
+                <mat-chip *ngFor="let strength of player.insights.strengths" color="primary">
+                  {{ strength }}
+                </mat-chip>
+              </mat-chip-list>
+            </div>
+
+            <div class="insights-group" *ngIf="player.insights.weaknesses.length > 0">
+              <h4>Weaknesses</h4>
+              <mat-chip-list>
+                <mat-chip *ngFor="let weakness of player.insights.weaknesses" color="warn">
+                  {{ weakness }}
+                </mat-chip>
+              </mat-chip-list>
+            </div>
+
+            <div class="insights-group" *ngIf="player.insights.recommendations.length > 0">
+              <h4>Recommendations</h4>
+              <mat-chip-list>
+                <mat-chip *ngFor="let recommendation of player.insights.recommendations" color="accent">
+                  {{ recommendation }}
+                </mat-chip>
+              </mat-chip-list>
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
