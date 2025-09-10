@@ -31,19 +31,18 @@ DINNR is a single-page application built with Angular that integrates with the P
 - **Styling**: SCSS with Angular Material theme
 - **Build Tool**: Angular CLI
 
-### 3.2 Backend (Optional)
-- **Runtime**: Node.js 18+
-- **Framework**: Express.js or NestJS
-- **Database**: PostgreSQL or MongoDB
-- **Cache**: Redis
-- **Authentication**: JWT tokens
+### 3.2 Architecture Approach
+- **Client-Side Focus**: Direct PUBG API integration from Angular frontend
+- **No Backend Required**: Eliminates server infrastructure complexity
+- **Type Safety**: Full TypeScript integration with @j03fr0st/pubg-ts
+- **Caching Strategy**: Browser-based storage and in-memory caching
 
 ### 3.3 Key Libraries
-- @j03fr0st/pubg-ts: PUBG API wrapper
-- @angular/material: UI components
-- rxjs: Reactive programming
-- chart.js: Data visualization
-- lodash: Utility functions
+- @j03fr0st/pubg-ts: Complete PUBG API wrapper with comprehensive TypeScript types
+- @angular/material: UI components and theming
+- rxjs: Reactive programming and state management
+- chart.js: Data visualization and charts
+- lodash: Utility functions and helpers
 
 ## 4. Project Structure
 
@@ -123,6 +122,14 @@ export class PubgApiService {
   async getTelemetry(telemetryUrl: string): Promise<TelemetryEvent[]> {
     return this.client.telemetry.getTelemetryData(telemetryUrl);
   }
+  
+  async getPlayerMatches(playerId: string): Promise<Match[]> {
+    return this.client.players.getPlayerMatches(playerId);
+  }
+  
+  async getSeasonStats(playerId: string, seasonId: string): Promise<SeasonStats> {
+    return this.client.players.getSeasonStats(playerId, seasonId);
+  }
 }
 ```
 
@@ -183,8 +190,9 @@ Raw Telemetry → Event Processing → Data Aggregation → Visualization → Us
 
 ### 8.1 API Key Management
 - Store API key in environment variables
-- Never expose API key in client-side code
-- Consider backend proxy for API calls
+- Client-side API key usage with @j03fr0st/pubg-ts
+- Implement proper CORS headers and security measures
+- Consider API key rotation and monitoring
 
 ### 8.2 Data Privacy
 - Don't store sensitive user data
@@ -197,11 +205,13 @@ Raw Telemetry → Event Processing → Data Aggregation → Visualization → Us
 - Static hosting on Firebase/Vercel/Netlify
 - CDN for assets
 - SSL/HTTPS enforced
+- No backend infrastructure required
 
-### 9.2 Backend Deployment (Optional)
-- Docker containers
-- Kubernetes for scaling
-- Load balancing
+### 9.2 Future Backend Considerations (Optional)
+- If backend is needed for scaling:
+  - Docker containers
+  - Kubernetes for scaling
+  - Load balancing
 
 ## 10. Monitoring and Logging
 
@@ -210,10 +220,11 @@ Raw Telemetry → Event Processing → Data Aggregation → Visualization → Us
 - Performance metrics
 - User behavior analytics
 
-### 10.2 Backend Monitoring
+### 10.2 API Monitoring
 - API call logging
 - Error monitoring
 - Performance metrics
+- Rate limiting tracking
 
 ## 11. Scaling Strategy
 

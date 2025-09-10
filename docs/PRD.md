@@ -57,14 +57,14 @@ To become the go-to analytics platform for PUBG players seeking to improve their
 - **Styling**: Modern CSS framework (Tailwind/Bootstrap)
 - **Charts**: Chart.js or similar for data visualization
 
-### 5.2 Backend
-- **API Integration**: @j03fr0st/pubg-ts package
-- **Data Processing**: Server-side processing for telemetry data
-- **Caching**: Redis or similar for performance optimization
-- **Database**: For storing user preferences and historical data
+### 5.2 API Integration
+- **Primary Package**: @j03fr0st/pubg-ts for PUBG API integration
+- **Data Processing**: Client-side processing for telemetry data
+- **Caching**: Local storage and in-memory caching
+- **Type Safety**: Full TypeScript support with comprehensive type definitions
 
 ### 5.3 Key Dependencies
-- @j03fr0st/pubg-ts for PUBG API integration
+- @j03fr0st/pubg-ts: Complete PUBG API wrapper with TypeScript types
 - Angular Material for UI components
 - Chart.js for data visualization
 - RxJS for reactive programming

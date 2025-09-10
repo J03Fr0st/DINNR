@@ -2,7 +2,7 @@
 
 ## 1. Overview
 
-This document defines the data models used throughout the DINNR application, including interfaces for PUBG API responses, internal data structures, and UI components.
+This document defines the data models used throughout the DINNR application, including TypeScript interfaces provided by the @j03fr0st/pubg-ts package, internal data structures, and UI components.
 
 ## 2. Core Data Models
 
@@ -10,6 +10,7 @@ This document defines the data models used throughout the DINNR application, inc
 
 #### 2.1.1 Player Interface
 ```typescript
+// These interfaces are provided by @j03fr0st/pubg-ts package
 export interface Player {
   id: string;
   type: 'player';
@@ -40,6 +41,7 @@ export interface PlayerStats {
 
 #### 2.1.2 Game Mode Stats
 ```typescript
+// Provided by @j03fr0st/pubg-ts package
 export interface GameModeStats {
   assists: number;
   boosts: number;
@@ -219,6 +221,7 @@ export interface PlayerData {
 
 #### 2.4.1 Telemetry Event Base
 ```typescript
+// These interfaces are provided by @j03fr0st/pubg-ts package
 export interface TelemetryEvent {
   type: string;
   timestamp: string;
@@ -254,6 +257,7 @@ export interface Vector3 {
 
 ##### LogPlayerPosition
 ```typescript
+// Provided by @j03fr0st/pubg-ts package
 export interface LogPlayerPosition extends TelemetryEvent {
   type: 'LogPlayerPosition';
   character: Character;
@@ -264,6 +268,7 @@ export interface LogPlayerPosition extends TelemetryEvent {
 
 ##### LogPlayerKill
 ```typescript
+// Provided by @j03fr0st/pubg-ts package
 export interface LogPlayerKill extends TelemetryEvent {
   type: 'LogPlayerKill';
   killer: Character;
@@ -284,6 +289,7 @@ export interface VictimGameResult {
 
 ##### LogMatchStart
 ```typescript
+// Provided by @j03fr0st/pubg-ts package
 export interface LogMatchStart extends TelemetryEvent {
   type: 'LogMatchStart';
   characters: Character[];
@@ -308,11 +314,48 @@ export interface BlueZoneCustomOptions {
 }
 ```
 
-## 3. Internal Application Models
+## 3. @j03fr0st/pubg-ts Package Integration
 
-### 3.1 Analysis Models
+### 3.1 Package Features
+The @j03fr0st/pubg-ts package provides:
+- Complete TypeScript interfaces for all PUBG API responses
+- Type-safe API client methods
+- Comprehensive telemetry event types
+- Automatic rate limiting and error handling
+- Modern async/await support
 
-#### 3.1.1 Match Analysis
+### 3.2 Package Usage
+```typescript
+import { PubgClient } from '@j03fr0st/pubg-ts';
+
+// Initialize client
+const client = new PubgClient({
+  apiKey: environment.pubgApiKey,
+  shard: 'pc-na'
+});
+
+// Get player data
+const player = await client.players.getPlayerByName('PlayerName');
+
+// Get match data
+const match = await client.matches.getMatch(matchId);
+
+// Get telemetry data
+const telemetry = await client.telemetry.getTelemetryData(telemetryUrl);
+```
+
+### 3.3 Available API Methods
+- `players.getPlayerByName(name)` - Get player by name
+- `players.getPlayerMatches(id)` - Get player's recent matches
+- `players.getSeasonStats(id, seasonId)` - Get seasonal stats
+- `matches.getMatch(id)` - Get match details
+- `telemetry.getTelemetryData(url)` - Get telemetry events
+
+## 4. Internal Application Models
+
+### 4.1 Analysis Models
+
+#### 4.1.1 Match Analysis
 ```typescript
 export interface MatchAnalysis {
   matchId: string;
@@ -387,7 +430,7 @@ export interface CombatStats {
 }
 ```
 
-#### 3.1.2 Player Insights
+#### 4.1.2 Player Insights
 ```typescript
 export interface PlayerInsights {
   strengths: string[];
@@ -420,9 +463,9 @@ export interface TeamPerformance {
 }
 ```
 
-### 3.2 UI Models
+### 4.2 UI Models
 
-#### 3.2.1 Chart Data Models
+#### 4.2.1 Chart Data Models
 ```typescript
 export interface ChartData {
   labels: string[];
@@ -453,7 +496,7 @@ export interface HeatmapData {
 }
 ```
 
-#### 3.2.2 Form Models
+#### 4.2.2 Form Models
 ```typescript
 export interface MatchAnalysisForm {
   matchId: string;
@@ -478,9 +521,9 @@ export interface FilterOptions {
 }
 ```
 
-## 4. Type Definitions
+## 5. Type Definitions
 
-### 4.1 Game Enums
+### 5.1 Game Enums
 ```typescript
 export enum GameMode {
   SOLO = 'solo',
@@ -514,7 +557,7 @@ export enum Shard {
 }
 ```
 
-### 4.2 Analysis Enums
+### 5.2 Analysis Enums
 ```typescript
 export enum PerformanceRating {
   EXCELLENT = 5,
@@ -544,9 +587,9 @@ export enum EventType {
 }
 ```
 
-## 5. Utility Types
+## 6. Utility Types
 
-### 5.1 Type Guards
+### 6.1 Type Guards
 ```typescript
 export function isTelemetryEvent(event: any): event is TelemetryEvent {
   return event && typeof event.type === 'string' && typeof event.timestamp === 'string';
@@ -561,7 +604,7 @@ export function isPlayerPositionEvent(event: TelemetryEvent): event is LogPlayer
 }
 ```
 
-### 5.2 Utility Functions
+### 6.2 Utility Functions
 ```typescript
 export function calculateKD(kills: number, deaths: number): number {
   return deaths === 0 ? kills : kills / deaths;

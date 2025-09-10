@@ -7,96 +7,87 @@ This document outlines the API design for DINNR, including both the external PUB
 ## 2. External API Integration (PUBG API)
 
 ### 2.1 Base Configuration
-- **Package**: @j03fr0st/pubg-ts
+- **Package**: @j03fr0st/pubg-ts (comprehensive PUBG API wrapper)
 - **Base URL**: https://api.pubg.com/
-- **Authentication**: API Key in headers
-- **Rate Limiting**: 10 requests per minute, 600 per hour
+- **Authentication**: API Key in headers (handled by the package)
+- **Rate Limiting**: 10 requests per minute, 600 per hour (automatic handling)
+- **Type Safety**: Full TypeScript support with comprehensive type definitions
 
 ### 2.2 Key Endpoints
 
 #### 2.2.1 Players API
 ```typescript
-// Get player by name
-GET /players?filter[playerNames]={playerName}
+// Get player by name using @j03fr0st/pubg-ts
+const player = await pubgClient.players.getPlayerByName('PlayerName');
 
-Response:
-{
-  "data": [
-    {
-      "type": "player",
-      "id": "account.d50fdc01a2bc44c4b734a60f4b5cf4f2",
-      "attributes": {
-        "name": "PlayerName",
-        "shardId": "pc-na",
-        "createdAt": "2017-01-01T00:00:00Z",
-        "updatedAt": "2020-01-01T00:00:00Z",
-        "patchVersion": "7.3.0",
-        "titleId": "bluehole-pubg",
-        "stats": {
-          "ranked": {
-            "gameModeStats": {
-              "solo": {...},
-              "duo": {...},
-              "squad": {...}
-            }
-          }
-        }
-      }
-    }
-  ]
+// TypeScript interface provided by the package
+interface Player {
+  id: string;
+  type: 'player';
+  attributes: PlayerAttributes;
+  relationships?: PlayerRelationships;
+}
+
+interface PlayerAttributes {
+  name: string;
+  shardId: string;
+  createdAt: string;
+  updatedAt: string;
+  patchVersion: string;
+  titleId: string;
+  stats?: PlayerStats;
 }
 ```
 
 #### 2.2.2 Matches API
 ```typescript
-// Get match by ID
-GET /matches/{matchId}
+// Get match by ID using @j03fr0st/pubg-ts
+const match = await pubgClient.matches.getMatch(matchId);
 
-Response:
-{
-  "data": {
-    "type": "match",
-    "id": "matchId",
-    "attributes": {
-      "createdAt": "2020-01-01T00:00:00Z",
-      "duration": 1800,
-      "gameMode": "squad",
-      "mapName": "Erangel",
-      "patchVersion": "7.3.0",
-      "shardId": "pc-na",
-      "stats": {...},
-      "titleId": "bluehole-pubg"
-    },
-    "relationships": {
-      "rosters": {
-        "data": [...]
-      },
-      "participants": {
-        "data": [...]
-      },
-      "assets": {
-        "data": [
-          {
-            "type": "asset",
-            "id": "telemetry",
-            "attributes": {
-              "name": "telemetry",
-              "URL": "https://telemetry.pubg.com/..."
-            }
-          }
-        ]
-      }
-    }
-  }
+// TypeScript interface provided by the package
+interface Match {
+  id: string;
+  type: 'match';
+  attributes: MatchAttributes;
+  relationships: MatchRelationships;
+}
+
+interface MatchAttributes {
+  createdAt: string;
+  duration: number;
+  gameMode: string;
+  mapName: string;
+  patchVersion: string;
+  shardId: string;
+  stats?: MatchStats;
+  titleId: string;
 }
 ```
 
 #### 2.2.3 Telemetry API
 ```typescript
-// Get telemetry data
-GET {telemetryUrl}
+// Get telemetry data using @j03fr0st/pubg-ts
+const telemetry = await pubgClient.telemetry.getTelemetryData(telemetryUrl);
 
-Response: Array of telemetry events
+// TypeScript interfaces provided by the package
+interface TelemetryEvent {
+  type: string;
+  timestamp: string;
+  common: TelemetryCommon;
+  [key: string]: any;
+}
+
+interface TelemetryCommon {
+  isGame: number;
+  matchId: string;
+}
+
+// Example event types provided by the package:
+// - LogPlayerPosition
+// - LogPlayerKill
+// - LogMatchStart
+// - LogPlayerTakeDamage
+// - And many more...
 ```
 
 ## 3. Internal Service APIs
@@ -392,8 +383,10 @@ interface ErrorResponse {
 
 ### 9.1 API Key Management
 - Store in environment variables
+- Client-side usage with @j03fr0st/pubg-ts package
 - Rotate keys regularly
-- Monitor usage
+- Monitor usage and implement rate limiting
+- Handle CORS and security headers properly
 
 ### 9.2 Input Validation
 - Validate match ID format (GUID)
