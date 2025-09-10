@@ -16,6 +16,7 @@ import { InsightsComponent } from './features/match-analysis/components/insights
 import { PerformanceChartComponent } from './features/match-analysis/components/performance-chart/performance-chart.component';
 import { KillTimelineComponent } from './features/match-analysis/components/kill-timeline/kill-timeline.component';
 import { TeamComparisonComponent } from './features/match-analysis/components/team-comparison/team-comparison.component';
+import { PubgApiService } from './core/services/pubg-api.service';
 
 @NgModule({
   declarations: [
@@ -40,6 +41,7 @@ import { TeamComparisonComponent } from './features/match-analysis/components/te
     AppRoutingModule
   ],
   providers: [
+    PubgApiService,
     {
       provide: HTTP_INTERCEPTORS,
       useClass: ErrorInterceptor,

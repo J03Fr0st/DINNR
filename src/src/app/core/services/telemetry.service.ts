@@ -6,7 +6,7 @@ import {
   TelemetryEvent, 
   LogPlayerPosition, 
   LogPlayerKill, 
-  TelemetryLocation,
+  Location as TelemetryLocation,
   Match,
   Shard as ApiShard
 } from '../models';
@@ -165,8 +165,13 @@ export class TelemetryService {
 
     const firstEvent = playerEvents[0];
     const lastEvent = playerEvents[playerEvents.length - 1];
-    
-    return (new Date(lastEvent._D).getTime() - new Date(firstEvent._D).getTime()) / 1000;
+
+    const firstTime = firstEvent._D ? new Date(firstEvent._D).getTime() : NaN;
+    const lastTime = lastEvent._D ? new Date(lastEvent._D).getTime() : NaN;
+    if (Number.isNaN(firstTime) || Number.isNaN(lastTime)) {
+      return 0;
+    }
+    return (lastTime - firstTime) / 1000;
   }
 
   private getPlacement(events: TelemetryEvent[], playerName: string): number {
@@ -240,7 +245,7 @@ export class TelemetryService {
 
   private createPlayerTimeline(events: TelemetryEvent[], playerName: string): any[] {
     return events.map(event => ({
-      time: new Date(event._D).getTime(),
+      time: event._D ? new Date(event._D).getTime() : Date.now(),
       event: event._T,
       position: event._T === 'LogPlayerPosition' ? (event as LogPlayerPosition).character.location : undefined,
       details: event._T === 'LogPlayerKill' ? {
@@ -289,7 +294,7 @@ export class TelemetryService {
       .map(event => {
         const killEvent = event as LogPlayerKill;
         return {
-          timestamp: new Date(event._D).getTime(),
+          timestamp: event._D ? new Date(event._D).getTime() : Date.now(),
           type: 'kill',
           description: `${killEvent.killer.name} eliminated ${killEvent.victim.name}`,
           impact: 5,

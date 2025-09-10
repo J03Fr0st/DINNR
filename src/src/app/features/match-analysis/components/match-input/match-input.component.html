@@ -73,19 +73,19 @@
 
     <div class="stats-grid">
       <div class="stat-card">
-        <div class="stat-value">{{ analysis.stats?.kills || 0 }}</div>
+        <div class="stat-value">{{ analysis.stats.kills || 0 }}</div>
         <div class="stat-label">Total Kills</div>
       </div>
       <div class="stat-card">
-        <div class="stat-value">{{ analysis.stats?.wins || 0 }}</div>
+        <div class="stat-value">{{ analysis.stats.wins || 0 }}</div>
         <div class="stat-label">Wins</div>
       </div>
       <div class="stat-card">
-        <div class="stat-value">{{ analysis.stats?.kdRatio?.toFixed(2) || '0.00' }}</div>
+        <div class="stat-value">{{ analysis.stats.kdRatio.toFixed(2) || '0.00' }}</div>
         <div class="stat-label">K/D Ratio</div>
       </div>
       <div class="stat-card">
-        <div class="stat-value">{{ analysis.stats?.damagePerMatch?.toFixed(0) || '0' }}</div>
+        <div class="stat-value">{{ analysis.stats.damagePerMatch.toFixed(0) || '0' }}</div>
         <div class="stat-label">Avg Damage</div>
       </div>
     </div>

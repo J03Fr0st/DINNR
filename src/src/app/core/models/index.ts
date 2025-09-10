@@ -34,16 +34,12 @@ export type {
 // Export telemetry types
 export type {
   TelemetryEvent,
-  TelemetryCommon,
+  Location,
   LogPlayerKill,
   LogPlayerPosition,
   LogPlayerTakeDamage,
   LogMatchStart,
   LogMatchEnd,
-  TelemetryPlayer,
-  TelemetryLocation,
-  TelemetryGameResult,
-  TelemetryGameStats,
   TelemetryData,
 } from '@j03fr0st/pubg-ts';
 
