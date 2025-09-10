@@ -1,8 +1,21 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { AnalysisService } from '../../../../core/services/index';
-import { MatchAnalysis, Shard } from '../../../../core/models/index';
+
+interface PlayerAnalysis {
+  playerName: string;
+  shard: string;
+  stats: {
+    kills: number;
+    wins: number;
+    kdRatio: number;
+    damagePerMatch: number;
+  };
+  insights: Array<{
+    type: string;
+    description: string;
+  }>;
+}
 
 @Component({
   selector: 'app-match-input',
@@ -10,74 +23,103 @@ import { MatchAnalysis, Shard } from '../../../../core/models/index';
   styleUrls: ['./match-input.component.scss']
 })
 export class MatchInputComponent implements OnInit {
-  matchForm!: FormGroup;
+  playerForm!: FormGroup;
   loading = false;
-  analysis: MatchAnalysis | null = null;
-  shards = ['pc-na', 'pc-eu', 'pc-as', 'pc-kakao', 'pc-sea', 'pc-krjp', 'pc-jp', 'pc-oc', 'pc-sa', 'pc-ru'];
+  analysis: PlayerAnalysis | null = null;
+  shards = [
+    { value: 'pc-na', label: 'North America' },
+    { value: 'pc-eu', label: 'Europe' },
+    { value: 'pc-as', label: 'Asia' },
+    { value: 'pc-kakao', label: 'Kakao' },
+    { value: 'pc-sea', label: 'South East Asia' },
+    { value: 'pc-krjp', label: 'Korea/Japan' },
+    { value: 'pc-jp', label: 'Japan' },
+    { value: 'pc-oc', label: 'Oceania' },
+    { value: 'pc-sa', label: 'South America' },
+    { value: 'pc-ru', label: 'Russia' },
+    { value: 'steam', label: 'Steam' }
+  ];
   
   constructor(
     private fb: FormBuilder,
-    private analysisService: AnalysisService,
     private snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
-    this.matchForm = this.fb.group({
-      matchId: ['', [Validators.required, Validators.pattern(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i)]],
-      playerNames: ['', [Validators.required]],
-      shard: ['pc-na', Validators.required]
+    this.playerForm = this.fb.group({
+      playerName: ['', [Validators.required, Validators.minLength(2)]],
+      shard: ['steam', Validators.required]
     });
   }
 
   onSubmit(): void {
-    if (this.matchForm.invalid) {
-      this.snackBar.open('Please fill in all required fields correctly', 'Close', { duration: 3000 });
+    if (this.playerForm.invalid) {
+      this.snackBar.open('Please enter a valid player name and select a shard', 'Close', { duration: 3000 });
       return;
     }
 
     this.loading = true;
-    const formData = this.matchForm.value;
-    const playerNames = formData.playerNames.split(',').map((name: string) => name.trim()).filter((name: string) => name);
+    const formData = this.playerForm.value;
 
-    this.analysisService.submitMatchAnalysis({
-      matchId: formData.matchId,
-      playerNames,
-      shard: formData.shard
-    }).subscribe({
-      next: (analysis) => {
-        this.analysis = analysis;
-        this.loading = false;
-        this.snackBar.open('Match analysis completed!', 'Close', { duration: 3000 });
-      },
-      error: (error) => {
-        this.loading = false;
-        this.snackBar.open(`Error: ${error.message}`, 'Close', { duration: 5000 });
-      }
-    });
-  }
-
-  addPlayerName(): void {
-    const currentNames = this.matchForm.get('playerNames')?.value || '';
-    const names = currentNames.split(',').map((name: string) => name.trim()).filter((name: string) => name);
-    names.push('');
-    this.matchForm.patchValue({ playerNames: names.join(', ') });
+    // Mock analysis data for demo purposes
+    setTimeout(() => {
+      this.analysis = {
+        playerName: formData.playerName,
+        shard: formData.shard,
+        stats: {
+          kills: 1250,
+          wins: 45,
+          kdRatio: 2.34,
+          damagePerMatch: 425
+        },
+        insights: [
+          {
+            type: 'Combat',
+            description: 'Excellent accuracy with assault rifles (68% hit rate)'
+          },
+          {
+            type: 'Strategy',
+            description: 'Prefers aggressive early-game positioning'
+          },
+          {
+            type: 'Improvement',
+            description: 'Consider improving late-game decision making'
+          }
+        ]
+      };
+      
+      this.loading = false;
+      this.snackBar.open('Player analysis completed!', 'Close', { duration: 3000 });
+    }, 2000);
   }
 
   exportAnalysis(): void {
-    if (this.analysis) {
-      const data = this.analysisService.exportMatchAnalysis(this.analysis);
+    if (!this.analysis) {
+      this.snackBar.open('No analysis data to export', 'Close', { duration: 3000 });
+      return;
+    }
+
+    try {
+      const data = JSON.stringify(this.analysis, null, 2);
       const blob = new Blob([data], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `match-analysis-${this.analysis.matchId}.json`;
+      a.download = `player-analysis-${this.analysis.playerName}-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
       URL.revokeObjectURL(url);
+      
+      this.snackBar.open('Analysis exported successfully!', 'Close', { duration: 3000 });
+    } catch (error) {
+      console.error('Export failed:', error);
+      this.snackBar.open('Failed to export analysis', 'Close', { duration: 3000 });
     }
   }
 
   resetForm(): void {
-    this.matchForm.reset();
+    this.playerForm.reset();
     this.analysis = null;
   }
 }
