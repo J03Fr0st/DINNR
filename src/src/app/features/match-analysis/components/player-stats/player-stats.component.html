@@ -63,10 +63,10 @@
           <div class="weapon-stats" *ngIf="Object.keys(player.stats.weapons).length > 0">
             <h4>Weapon Usage</h4>
             <div class="weapons-list">
-              <div *ngFor="let weapon of Object.keys(player.stats.weapons) | keyvalue" class="weapon-item">
+              <div *ngFor="let weapon of Object.keys(getWeaponStats(player.stats.weapons)) | keyvalue" class="weapon-item">
                 <span class="weapon-name">{{ weapon.key }}</span>
-                <span class="weapon-kills">{{ weapon.value.kills }} kills</span>
-                <span class="weapon-damage">{{ Math.round(weapon.value.damage) }} damage</span>
+                <span class="weapon-kills">{{ getWeaponStats(player.stats.weapons)[weapon.key].kills }} kills</span>
+                <span class="weapon-damage">{{ Math.round(getWeaponStats(player.stats.weapons)[weapon.key].damage) }} damage</span>
               </div>
             </div>
           </div>

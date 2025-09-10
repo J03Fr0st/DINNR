@@ -10,10 +10,10 @@ import { MatchAnalysis, Shard } from '../../../../core/models/index';
   styleUrls: ['./match-input.component.scss']
 })
 export class MatchInputComponent implements OnInit {
-  matchForm: FormGroup;
+  matchForm!: FormGroup;
   loading = false;
   analysis: MatchAnalysis | null = null;
-  shards = Object.values(Shard);
+  shards = ['pc-na', 'pc-eu', 'pc-as', 'pc-kakao', 'pc-sea', 'pc-krjp', 'pc-jp', 'pc-oc', 'pc-sa', 'pc-ru'];
   
   constructor(
     private fb: FormBuilder,
@@ -25,7 +25,7 @@ export class MatchInputComponent implements OnInit {
     this.matchForm = this.fb.group({
       matchId: ['', [Validators.required, Validators.pattern(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i)]],
       playerNames: ['', [Validators.required]],
-      shard: [Shard.PC_NA, Validators.required]
+      shard: ['pc-na', Validators.required]
     });
   }
 

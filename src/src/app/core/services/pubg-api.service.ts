@@ -3,13 +3,13 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of, throwError, forkJoin, switchMap } from 'rxjs';
 import { map, catchError, retry } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-import { Player, Match, TelemetryEvent, Shard } from '../models';
+import { Player, Match, TelemetryEvent, Shard as ApiShard } from '../models';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PubgApiService {
-  private readonly baseUrl = environment.apiBaseUrl;
+  private readonly baseUrl = environment.apiBaseUrl || 'https://api.pubg.com';
   private readonly apiKey = environment.pubgApiKey;
   private readonly cache = new Map<string, { data: any; timestamp: number }>();
   private readonly cacheTtl = environment.cacheTtl;
@@ -40,7 +40,7 @@ export class PubgApiService {
     this.cache.set(key, { data, timestamp: Date.now() });
   }
 
-  getPlayerByName(playerName: string, shard: Shard = Shard.PC_NA): Observable<Player> {
+  getPlayerByName(playerName: string, shard: ApiShard = 'pc-na' as ApiShard): Observable<Player> {
     const cacheKey = this.getCacheKey(`player-${playerName}`, { shard });
     const cached = this.getFromCache<Player>(cacheKey);
     if (cached) {
@@ -66,7 +66,7 @@ export class PubgApiService {
     );
   }
 
-  getMatch(matchId: string, shard: Shard = Shard.PC_NA): Observable<Match> {
+  getMatch(matchId: string, shard: ApiShard = 'pc-na' as ApiShard): Observable<Match> {
     const cacheKey = this.getCacheKey(`match-${matchId}`, { shard });
     const cached = this.getFromCache<Match>(cacheKey);
     if (cached) {
@@ -109,7 +109,7 @@ export class PubgApiService {
     );
   }
 
-  getPlayerMatches(playerId: string, shard: Shard = Shard.PC_NA): Observable<Match[]> {
+  getPlayerMatches(playerId: string, shard: ApiShard = 'pc-na' as ApiShard): Observable<Match[]> {
     const cacheKey = this.getCacheKey(`player-matches-${playerId}`, { shard });
     const cached = this.getFromCache<Match[]>(cacheKey);
     if (cached) {
@@ -133,6 +133,28 @@ export class PubgApiService {
     );
   }
 
+  getPlayerSeasonStats(playerId: string, seasonId: string, shard: ApiShard = 'pc-na' as ApiShard): Observable<any> {
+    const cacheKey = this.getCacheKey(`player-season-stats-${playerId}-${seasonId}`, { shard });
+    const cached = this.getFromCache<any>(cacheKey);
+    if (cached) {
+      return of(cached);
+    }
+
+    const url = `${this.baseUrl}/shards/${shard}/players/${playerId}/seasons/${seasonId}`;
+    
+    return this.http.get<any>(url, { headers: this.getHeaders() }).pipe(
+      retry(2),
+      map(stats => {
+        this.setCache(cacheKey, stats);
+        return stats;
+      }),
+      catchError(error => {
+        console.error('Error fetching player season stats:', error);
+        return throwError(() => new Error(`Failed to fetch player season stats: ${error.message}`));
+      })
+    );
+  }
+
   clearCache(): void {
     this.cache.clear();
   }
@@ -144,7 +166,7 @@ export class PubgApiService {
     };
   }
 
-  private getPlayerByAccountId(playerId: string, shard: Shard): Observable<Player> {
+  private getPlayerByAccountId(playerId: string, shard: ApiShard): Observable<Player> {
     const url = `${this.baseUrl}/shards/${shard}/players/${playerId}`;
     
     return this.http.get<{ data: Player }>(url, { headers: this.getHeaders() }).pipe(

@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { PlayerAnalysis } from '../../../../core/models/index';
+import { PlayerAnalysis, WeaponStats } from '../../../../core/models/index';
 
 @Component({
   selector: 'app-player-stats',
@@ -8,6 +8,15 @@ import { PlayerAnalysis } from '../../../../core/models/index';
 })
 export class PlayerStatsComponent {
   @Input() players: PlayerAnalysis[] = [];
+  
+  // Make Math and Object available to template
+  Math = Math;
+  Object = Object;
+  
+  // Helper method to safely cast weapon stats
+  getWeaponStats(weapons: any): WeaponStats {
+    return weapons as WeaponStats;
+  }
 
   getPerformanceColor(rating: number): string {
     if (rating >= 4) return 'green';

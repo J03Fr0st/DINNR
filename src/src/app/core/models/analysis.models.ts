@@ -122,6 +122,6 @@ export interface TimelinePoint {
 export interface PlayerTimeline {
   time: number;
   event: string;
-  position?: TelemetryLocation;
+  position?: { x: number; y: number; z: number };
   details?: any;
 }

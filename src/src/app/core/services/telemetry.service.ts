@@ -7,10 +7,10 @@ import {
   LogPlayerPosition, 
   LogPlayerKill, 
   TelemetryLocation,
-  Match
+  Match,
+  Shard as ApiShard
 } from '../models';
 import { MatchAnalysis, PlayerAnalysis, PlayerMatchStats, PlayerInsights, MatchSummary, AnalysisInsights } from '../models/analysis.models';
-import { Shard } from '../models/ui.models';
 
 @Injectable({
   providedIn: 'root'
@@ -18,10 +18,10 @@ import { Shard } from '../models/ui.models';
 export class TelemetryService {
   constructor(private pubgApiService: PubgApiService) {}
 
-  analyzeMatch(matchId: string, playerNames: string[], shard: Shard = Shard.PC_NA): Observable<MatchAnalysis> {
+  analyzeMatch(matchId: string, playerNames: string[], shard: ApiShard = 'pc-na' as ApiShard): Observable<MatchAnalysis> {
     return this.pubgApiService.getMatch(matchId, shard).pipe(
       switchMap(match => {
-        return this.pubgApiService.getTelemetry(match.relationships.assets.data[0].attributes.URL).pipe(
+        return this.pubgApiService.getTelemetry((match as any).relationships?.assets?.data[0]?.attributes?.URL || '').pipe(
           map(telemetry => this.processTelemetry(telemetry, playerNames, match)),
           catchError(error => {
             console.error('Error processing telemetry:', error);
@@ -99,7 +99,7 @@ export class TelemetryService {
       e._T === 'LogPlayerKill' && (e as LogPlayerKill).killer.name === playerName
     ) as LogPlayerKill[];
 
-    const totalDamage = killEvents.reduce((sum, event) => sum + (event.victimGameResult.stats?.damageDealt || 0), 0);
+    const totalDamage = killEvents.reduce((sum, event) => sum + ((event as any).victimGameResult?.stats?.damageDealt || 0), 0);
     const totalDistance = this.calculateTotalDistance(events, playerName);
 
     return {
@@ -176,7 +176,7 @@ export class TelemetryService {
     
     if (deathEvent && deathEvent._T === 'LogPlayerKill') {
       const killEvent = deathEvent as LogPlayerKill;
-      return killEvent.victimGameResult.stats?.rank || 1;
+      return (killEvent as any).victimGameResult?.stats?.rank || 1;
     }
     
     return 1; // Survived to the end
@@ -197,7 +197,7 @@ export class TelemetryService {
         };
       }
       weaponStats[weapon].kills++;
-      weaponStats[weapon].damage += event.victimGameResult.stats?.damageDealt || 0;
+      weaponStats[weapon].damage += (event as any).victimGameResult?.stats?.damageDealt || 0;
     });
 
     return weaponStats;

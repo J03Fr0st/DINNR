@@ -66,7 +66,18 @@ export enum MapName {
   HAVEN = 'Haven'
 }
 
-// Shard is imported from pubg-ts types
+export enum Shard {
+  PC_NA = 'pc-na',
+  PC_EU = 'pc-eu',
+  PC_AS = 'pc-as',
+  PC_KAKAO = 'pc-kakao',
+  PC_SEA = 'pc-sea',
+  PC_KRJP = 'pc-krjp',
+  PC_JP = 'pc-jp',
+  PC_OC = 'pc-oc',
+  PC_SA = 'pc-sa',
+  PC_RU = 'pc-ru'
+}
 
 export enum PerformanceRating {
   EXCELLENT = 5,
