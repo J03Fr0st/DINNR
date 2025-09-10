@@ -1,1 +1,151 @@
-/* You can add global styles to this file, and also import other style files */
+/* Import Angular Material theme */
+@use '@angular/material' as mat;
+
+/* Define custom theme colors */
+$pubg-primary: mat.define-palette(mat.$gray-palette, 900, 800, 900);
+$pubg-accent: mat.define-palette(mat.$red-palette, 700, 600, 800);
+$pubg-warn: mat.define-palette(mat.$orange-palette, 800);
+
+$pubg-theme: mat.define-light-theme((
+  color: (
+    primary: $pubg-primary,
+    accent: $pubg-accent,
+    warn: $pubg-warn,
+  ),
+  typography: mat.define-typography-config(),
+  density: 0,
+));
+
+/* Include theme styles */
+@include mat.core-theme($pubg-theme);
+@include mat.button-theme($pubg-theme);
+@include mat.card-theme($pubg-theme);
+@include mat.form-field-theme($pubg-theme);
+@include mat.input-theme($pubg-theme);
+@include mat.select-theme($pubg-theme);
+@include mat.progress-spinner-theme($pubg-theme);
+@include mat.tabs-theme($pubg-theme);
+@include mat.chips-theme($pubg-theme);
+@include mat.icon-theme($pubg-theme);
+@include mat.snack-bar-theme($pubg-theme);
+
+/* Global styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: 'Roboto', 'Helvetica Neue', sans-serif;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  color: #ffffff;
+  min-height: 100%;
+  line-height: 1.6;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #4a4a4a;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #6a6a6a;
+}
+
+/* Utility classes */
+.text-center {
+  text-align: center;
+}
+
+.mt-1 { margin-top: 0.5rem; }
+.mt-2 { margin-top: 1rem; }
+.mt-3 { margin-top: 1.5rem; }
+.mt-4 { margin-top: 2rem; }
+
+.mb-1 { margin-bottom: 0.5rem; }
+.mb-2 { margin-bottom: 1rem; }
+.mb-3 { margin-bottom: 1.5rem; }
+.mb-4 { margin-bottom: 2rem; }
+
+.p-1 { padding: 0.5rem; }
+.p-2 { padding: 1rem; }
+.p-3 { padding: 1.5rem; }
+.p-4 { padding: 2rem; }
+
+/* Material card overrides */
+mat-card {
+  background: rgba(45, 45, 45, 0.9) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(10px) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+}
+
+mat-card-title {
+  color: #ffffff !important;
+  font-weight: 600 !important;
+}
+
+mat-card-subtitle {
+  color: #b0b0b0 !important;
+}
+
+/* Button styling */
+.mat-mdc-raised-button {
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+}
+
+.mat-mdc-raised-button.mat-primary {
+  background: linear-gradient(45deg, #d32f2f, #f44336) !important;
+}
+
+/* Input field styling */
+.mat-mdc-form-field {
+  width: 100% !important;
+}
+
+.mat-mdc-input-element {
+  color: #ffffff !important;
+}
+
+.mat-mdc-form-field-label {
+  color: #b0b0b0 !important;
+}
+
+.mat-mdc-form-field-underline {
+  background-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.mat-mdc-form-field-ripple {
+  background-color: #f44336 !important;
+}
+
+/* Responsive grid */
+@media (max-width: 768px) {
+  .features-grid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .hero-actions {
+    flex-direction: column !important;
+    gap: 1rem !important;
+  }
+}

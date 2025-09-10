@@ -197,8 +197,6 @@ ng lint --fix       # Fix linting issues
 ### Required Environment Variables
 ```env
 PUBG_API_KEY=your_api_key_here
-API_BASE_URL=https://api.pubg.com
-CACHE_TTL=3600000
 ```
 
 ### Development Environment
