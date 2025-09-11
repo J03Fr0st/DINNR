@@ -1,11 +1,15 @@
 import { Component, Input } from "@angular/core";
 import type { MatchSummary } from "../../../../core/models/index";
+import { CommonModule } from "@angular/common";
+import { MatCardModule } from "@angular/material/card";
+import { MatIconModule } from "@angular/material/icon";
 
 @Component({
   selector: "app-match-summary",
   templateUrl: "./match-summary.component.html",
   styleUrls: ["./match-summary.component.scss"],
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule, MatCardModule, MatIconModule],
 })
 export class MatchSummaryComponent {
   @Input() summary: MatchSummary | null = null;

@@ -1,11 +1,18 @@
 import { Component, Input } from "@angular/core";
 import type { AnalysisInsights } from "../../../../core/models/index";
+import { MatCardModule } from "@angular/material/card";
+import { MatChipsModule } from "@angular/material/chips";
+import { MatIconModule } from "@angular/material/icon";
+import { CommonModule } from "@angular/common";
+import { CUSTOM_ELEMENTS_SCHEMA } from "@angular/core";
 
 @Component({
   selector: "app-insights",
   templateUrl: "./insights.component.html",
   styleUrls: ["./insights.component.scss"],
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule, MatCardModule, MatChipsModule, MatIconModule],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class InsightsComponent {
   @Input() insights: AnalysisInsights | null = null;

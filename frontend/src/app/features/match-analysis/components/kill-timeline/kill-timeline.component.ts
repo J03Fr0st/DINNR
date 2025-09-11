@@ -1,4 +1,5 @@
 import { Component, Input } from "@angular/core";
+import { CommonModule } from "@angular/common";
 
 interface TimelineData {
   matchNumber: number;
@@ -53,7 +54,8 @@ interface TimelineData {
     .empty-state { text-align: center; padding: 16px; color: #aaa; }
   `,
   ],
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule],
 })
 export class KillTimelineComponent {
   @Input() timelineData: TimelineData[] = [];

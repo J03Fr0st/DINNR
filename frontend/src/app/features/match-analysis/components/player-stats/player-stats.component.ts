@@ -1,11 +1,15 @@
 import { Component, Input } from "@angular/core";
 import type { PlayerAnalysis, WeaponStats } from "../../../../core/models/index";
+import { CommonModule } from "@angular/common";
+import { MatCardModule } from "@angular/material/card";
+import { MatChipsModule } from "@angular/material/chips";
 
 @Component({
   selector: "app-player-stats",
   templateUrl: "./player-stats.component.html",
   styleUrls: ["./player-stats.component.scss"],
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule, MatCardModule, MatChipsModule],
 })
 export class PlayerStatsComponent {
   @Input() players: PlayerAnalysis[] = [];

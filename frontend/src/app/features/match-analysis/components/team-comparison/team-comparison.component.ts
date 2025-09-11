@@ -1,4 +1,5 @@
 import { Component, Input } from "@angular/core";
+import { CommonModule } from "@angular/common";
 
 @Component({
   selector: "app-team-comparison",
@@ -38,7 +39,8 @@ import { Component, Input } from "@angular/core";
     }
   `,
   ],
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule],
 })
 export class TeamComparisonComponent {
   @Input() comparisonData: any[] = [];

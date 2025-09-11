@@ -1,5 +1,13 @@
 import { Component, type OnInit } from "@angular/core";
-import { FormBuilder, FormGroup, Validators } from "@angular/forms";
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from "@angular/forms";
+import { CommonModule } from "@angular/common";
+import { MatCardModule } from "@angular/material/card";
+import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatInputModule } from "@angular/material/input";
+import { MatButtonModule } from "@angular/material/button";
+import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
+import { MatSnackBarModule } from "@angular/material/snack-bar";
+import { MatIconModule } from "@angular/material/icon";
 
 @Component({
   selector: "app-player-stats",
@@ -75,12 +83,12 @@ import { FormBuilder, FormGroup, Validators } from "@angular/forms";
       margin: 0 auto;
       padding: 40px 20px;
     }
-    
+
     .page-header {
       text-align: center;
       margin-bottom: 40px;
     }
-    
+
     .page-header h1 {
       font-size: 2.5em;
       color: #333;
@@ -90,12 +98,12 @@ import { FormBuilder, FormGroup, Validators } from "@angular/forms";
       justify-content: center;
       gap: 15px;
     }
-    
+
     .page-header mat-icon {
       color: #667eea;
       font-size: 1.2em;
     }
-    
+
     .page-description {
       font-size: 1.2em;
       color: #666;
@@ -103,80 +111,80 @@ import { FormBuilder, FormGroup, Validators } from "@angular/forms";
       margin: 0 auto;
       line-height: 1.5;
     }
-    
+
     .stats-form-card {
       margin-bottom: 30px;
     }
-    
+
     .player-form {
       display: flex;
       flex-direction: column;
       gap: 20px;
     }
-    
+
     .full-width {
       width: 100%;
     }
-    
+
     .form-actions {
       display: flex;
       gap: 15px;
       justify-content: flex-start;
       flex-wrap: wrap;
     }
-    
+
     .form-actions button {
       display: flex;
       align-items: center;
       gap: 8px;
     }
-    
+
     .info-card {
       background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
     }
-    
+
     .info-content {
       display: flex;
       align-items: flex-start;
       gap: 20px;
     }
-    
+
     .info-icon {
       font-size: 48px !important;
       color: #667eea;
       flex-shrink: 0;
     }
-    
+
     .info-content h3 {
       margin: 0 0 15px 0;
       color: #333;
     }
-    
+
     .info-content ul {
       margin: 0;
       padding-left: 20px;
       color: #666;
     }
-    
+
     .info-content li {
       margin-bottom: 8px;
     }
-    
+
     @media (max-width: 768px) {
       .page-header h1 {
         font-size: 2em;
         flex-direction: column;
         gap: 10px;
       }
-      
+
       .page-description {
         font-size: 1.1em;
       }
-      
+
       .form-actions {
         justify-content: center;
       }
-      
+
       .info-content {
         flex-direction: column;
         text-align: center;
@@ -184,7 +192,18 @@ import { FormBuilder, FormGroup, Validators } from "@angular/forms";
     }
   `,
   ],
-  standalone: false,
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatProgressSpinnerModule,
+    MatSnackBarModule,
+    MatIconModule,
+  ],
 })
 export class PlayerStatsComponent implements OnInit {
   playerForm!: FormGroup;

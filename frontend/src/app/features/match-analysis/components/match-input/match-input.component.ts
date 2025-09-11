@@ -1,9 +1,16 @@
 import { Component, type OnInit } from "@angular/core";
-import { FormBuilder, FormGroup, Validators } from "@angular/forms";
-import { MatSnackBar } from "@angular/material/snack-bar";
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from "@angular/forms";
+import { MatSnackBar, MatSnackBarModule } from "@angular/material/snack-bar";
 import { finalize, map, switchMap } from "rxjs/operators";
 import { Match, MatchResponse, Participant, ParticipantAttributes, type Player } from "../../../../core/models";
 import { PubgApiService } from "../../../../core/services";
+import { CommonModule } from "@angular/common";
+import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatInputModule } from "@angular/material/input";
+import { MatButtonModule } from "@angular/material/button";
+import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
+import { PerformanceChartComponent } from "../performance-chart/performance-chart.component";
+import { KillTimelineComponent } from "../kill-timeline/kill-timeline.component";
 
 interface PlayerStats {
   kills: number;
@@ -46,7 +53,18 @@ interface PlayerAnalysis {
   selector: "app-match-input",
   templateUrl: "./match-input.component.html",
   styleUrls: ["./match-input.component.scss"],
-  standalone: false,
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatProgressSpinnerModule,
+    MatSnackBarModule,
+    PerformanceChartComponent,
+    KillTimelineComponent,
+  ],
 })
 export class MatchInputComponent implements OnInit {
   playerForm!: FormGroup;

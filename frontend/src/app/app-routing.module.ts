@@ -3,14 +3,14 @@ import { RouterModule, type Routes } from "@angular/router";
 
 const routes: Routes = [
   { path: "", redirectTo: "/home", pathMatch: "full" },
-  { path: "home", loadChildren: () => import("./features/home/home.module").then((m) => m.HomeModule) },
+  { path: "home", loadComponent: () => import("./features/home/home.component").then((m) => m.HomeComponent) },
   {
     path: "player-stats",
-    loadChildren: () => import("./features/player-stats/player-stats.module").then((m) => m.PlayerStatsModule),
+    loadComponent: () => import("./features/player-stats/player-stats.component").then((m) => m.PlayerStatsComponent),
   },
   {
     path: "match-analysis",
-    loadChildren: () => import("./features/match-analysis/match-analysis.module").then((m) => m.MatchAnalysisModule),
+    loadComponent: () => import("./features/match-analysis/match-analysis.component").then((m) => m.MatchAnalysisComponent),
   },
   { path: "**", redirectTo: "/home" },
 ];

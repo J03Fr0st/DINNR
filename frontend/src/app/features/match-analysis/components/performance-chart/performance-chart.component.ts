@@ -1,4 +1,5 @@
 import { Component, Input } from "@angular/core";
+import { CommonModule } from "@angular/common";
 
 interface PerformanceData {
   metric: string;
@@ -43,7 +44,8 @@ interface PerformanceData {
     }
   `,
   ],
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule],
 })
 export class PerformanceChartComponent {
   @Input() performanceData: PerformanceData[] = [];
