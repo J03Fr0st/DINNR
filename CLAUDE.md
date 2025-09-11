@@ -8,7 +8,7 @@ DINNR is a PUBG analytics platform that transforms raw telemetry data into clear
 
 ## Technology Stack
 
-- **Frontend**: Angular 17+ with TypeScript
+- **Frontend**: Angular 20+ with TypeScript
 - **API Integration**: @j03fr0st/pubg-ts package
 - **State Management**: RxJS + Signals
 - **UI Framework**: Angular Material
