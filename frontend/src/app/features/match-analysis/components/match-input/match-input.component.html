@@ -67,25 +67,25 @@
     <div class="results-header">
       <h2>Player Analysis Results</h2>
       <div class="match-info">
-        <strong>{{ analysis?.playerName || 'Unknown' }}</strong> • {{ analysis?.shard || 'Unknown' }}
+        <strong>{{ analysis.playerName || 'Unknown' }}</strong> • {{ analysis.shard || 'Unknown' }}
       </div>
     </div>
 
     <div class="stats-grid">
       <div class="stat-card">
-        <div class="stat-value">{{ analysis?.stats?.kills || 0 }}</div>
+        <div class="stat-value">{{ analysis.stats.kills || 0 }}</div>
         <div class="stat-label">Total Kills</div>
       </div>
       <div class="stat-card">
-        <div class="stat-value">{{ analysis?.stats?.wins || 0 }}</div>
+        <div class="stat-value">{{ analysis.stats.wins || 0 }}</div>
         <div class="stat-label">Wins</div>
       </div>
       <div class="stat-card">
-        <div class="stat-value">{{ analysis?.stats?.kdRatio?.toFixed(2) || '0.00' }}</div>
+        <div class="stat-value">{{ (analysis.stats.kdRatio || 0).toFixed(2) }}</div>
         <div class="stat-label">K/D Ratio</div>
       </div>
       <div class="stat-card">
-        <div class="stat-value">{{ analysis?.stats?.damagePerMatch?.toFixed(0) || '0' }}</div>
+        <div class="stat-value">{{ (analysis.stats.damagePerMatch || 0).toFixed(0) }}</div>
         <div class="stat-label">Avg Damage</div>
       </div>
     </div>

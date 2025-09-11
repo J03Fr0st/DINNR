@@ -54,11 +54,11 @@
           <div class="performance-item">
             <div class="performance-label">Overall</div>
             <div class="performance-bar">
-              <div class="performance-fill" [ngClass]="getTeamPerformanceColor(insights?.teamPerformance?.overallRating || 0)"
-                   [style.width.%]="(insights?.teamPerformance?.overallRating || 0) * 20">
+              <div class="performance-fill" [ngClass]="getTeamPerformanceColor(insights.teamPerformance.overallRating || 0)"
+                   [style.width.%]="(insights.teamPerformance.overallRating || 0) * 20">
               </div>
             </div>
-            <div class="performance-value">{{ insights?.teamPerformance?.overallRating || 0 }}/5</div>
+            <div class="performance-value">{{ insights.teamPerformance.overallRating || 0 }}/5</div>
           </div>
         </div>
       </div>
