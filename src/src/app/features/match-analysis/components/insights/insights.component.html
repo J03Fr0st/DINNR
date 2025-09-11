@@ -4,7 +4,7 @@
       <mat-card-title>Match Insights</mat-card-title>
       <mat-card-subtitle>AI-powered analysis and recommendations</mat-card-subtitle>
     </mat-card-header>
-    
+
     <mat-card-content *ngIf="insights">
       <div class="overall-quality">
         <h3>Overall Match Quality</h3>
@@ -30,7 +30,7 @@
             </div>
             <div class="performance-value">{{ insights.teamPerformance.coordination }}/5</div>
           </div>
-          
+
           <div class="performance-item">
             <div class="performance-label">Communication</div>
             <div class="performance-bar">
@@ -40,7 +40,7 @@
             </div>
             <div class="performance-value">{{ insights.teamPerformance.communication }}/5</div>
           </div>
-          
+
           <div class="performance-item">
             <div class="performance-label">Strategy</div>
             <div class="performance-bar">
@@ -50,15 +50,15 @@
             </div>
             <div class="performance-value">{{ insights.teamPerformance.strategy }}/5</div>
           </div>
-          
+
           <div class="performance-item">
             <div class="performance-label">Overall</div>
             <div class="performance-bar">
-              <div class="performance-fill" [ngClass]="getTeamPerformanceColor(insights.teamPerformance.overallRating)"
-                   [style.width.%]="insights.teamPerformance.overallRating * 20">
+              <div class="performance-fill" [ngClass]="getTeamPerformanceColor(insights?.teamPerformance?.overallRating || 0)"
+                   [style.width.%]="(insights?.teamPerformance?.overallRating || 0) * 20">
               </div>
             </div>
-            <div class="performance-value">{{ insights.teamPerformance.overallRating }}/5</div>
+            <div class="performance-value">{{ insights?.teamPerformance?.overallRating || 0 }}/5</div>
           </div>
         </div>
       </div>

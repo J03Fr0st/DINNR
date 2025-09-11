@@ -1,27 +1,25 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, of, throwError, forkJoin, switchMap } from 'rxjs';
-import { map, catchError, retry } from 'rxjs/operators';
+import { Observable, of, throwError, forkJoin } from 'rxjs';
+import { map, catchError, switchMap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
+import { PubgClient } from '@j03fr0st/pubg-ts';
 import { Player, Match, TelemetryEvent, Shard as ApiShard } from '../models';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PubgApiService {
-  private readonly baseUrl = environment.apiBaseUrl || 'https://api.pubg.com';
-  private readonly apiKey = environment.pubgApiKey;
+  private readonly pubgClient: PubgClient;
   private readonly cache = new Map<string, { data: any; timestamp: number }>();
   private readonly cacheTtl = environment.cacheTtl;
 
-  constructor(private http: HttpClient) {}
-
-  private getHeaders(): HttpHeaders {
-    return new HttpHeaders({
-      'Authorization': `Bearer ${this.apiKey}`,
-      'Accept': 'application/vnd.api+json'
+  constructor() {
+    this.pubgClient = new PubgClient({
+      apiKey: environment.pubgApiKey,
+      shard: 'pc-na'
     });
   }
+
 
   private getCacheKey(endpoint: string, params: any = {}): string {
     return `${endpoint}-${JSON.stringify(params)}`;
@@ -47,23 +45,23 @@ export class PubgApiService {
       return of(cached);
     }
 
-    const url = `${this.baseUrl}/shards/${shard}/players?filter[playerNames]=${encodeURIComponent(playerName)}`;
-    
-    return this.http.get<{ data: Player[] }>(url, { headers: this.getHeaders() }).pipe(
-      retry(2),
-      map(response => {
-        if (response.data && response.data.length > 0) {
-          const player = response.data[0];
-          this.setCache(cacheKey, player);
-          return player;
-        }
-        throw new Error(`Player '${playerName}' not found`);
-      }),
-      catchError(error => {
-        console.error('Error fetching player:', error);
-        return throwError(() => new Error(`Failed to fetch player '${playerName}': ${error.message}`));
-      })
-    );
+    return new Observable(observer => {
+      this.pubgClient.players.getPlayerByName(playerName)
+        .then(response => {
+          if (response.data && response.data.length > 0) {
+            const player = response.data[0];
+            this.setCache(cacheKey, player);
+            observer.next(player);
+            observer.complete();
+          } else {
+            observer.error(new Error(`Player '${playerName}' not found`));
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching player:', error);
+          observer.error(new Error(`Failed to fetch player '${playerName}': ${error.message}`));
+        });
+    });
   }
 
   getMatch(matchId: string, shard: ApiShard = 'pc-na' as ApiShard): Observable<Match> {
@@ -73,20 +71,19 @@ export class PubgApiService {
       return of(cached);
     }
 
-    const url = `${this.baseUrl}/shards/${shard}/matches/${matchId}`;
-    
-    return this.http.get<{ data: Match }>(url, { headers: this.getHeaders() }).pipe(
-      retry(2),
-      map(response => response.data),
-      map(match => {
-        this.setCache(cacheKey, match);
-        return match;
-      }),
-      catchError(error => {
-        console.error('Error fetching match:', error);
-        return throwError(() => new Error(`Failed to fetch match '${matchId}': ${error.message}`));
-      })
-    );
+    return new Observable(observer => {
+      this.pubgClient.matches.getMatch(matchId)
+        .then(response => {
+          const match = response.data;
+          this.setCache(cacheKey, match);
+          observer.next(match);
+          observer.complete();
+        })
+        .catch(error => {
+          console.error('Error fetching match:', error);
+          observer.error(new Error(`Failed to fetch match '${matchId}': ${error.message}`));
+        });
+    });
   }
 
   getTelemetry(telemetryUrl: string): Observable<TelemetryEvent[]> {
@@ -96,17 +93,18 @@ export class PubgApiService {
       return of(cached);
     }
 
-    return this.http.get<TelemetryEvent[]>(telemetryUrl).pipe(
-      retry(2),
-      map(events => {
-        this.setCache(cacheKey, events);
-        return events;
-      }),
-      catchError(error => {
-        console.error('Error fetching telemetry:', error);
-        return throwError(() => new Error(`Failed to fetch telemetry: ${error.message}`));
-      })
-    );
+    return new Observable(observer => {
+      this.pubgClient.telemetry.getTelemetryData(telemetryUrl)
+        .then(events => {
+          this.setCache(cacheKey, events);
+          observer.next(events);
+          observer.complete();
+        })
+        .catch(error => {
+          console.error('Error fetching telemetry:', error);
+          observer.error(new Error(`Failed to fetch telemetry: ${error.message}`));
+        });
+    });
   }
 
   getPlayerMatches(playerId: string, shard: ApiShard = 'pc-na' as ApiShard): Observable<Match[]> {
@@ -116,21 +114,50 @@ export class PubgApiService {
       return of(cached);
     }
 
-    return this.getPlayerByAccountId(playerId, shard).pipe(
-      switchMap(player => {
-        const matchIds = player.relationships?.matches?.data.map(m => m.id) || [];
-        const matchObservables = matchIds.map(matchId => this.getMatch(matchId, shard));
-        return forkJoin(matchObservables);
-      }),
-      map(matches => {
-        this.setCache(cacheKey, matches);
-        return matches;
-      }),
-      catchError(error => {
-        console.error('Error fetching player matches:', error);
-        return throwError(() => new Error(`Failed to fetch player matches: ${error.message}`));
-      })
-    );
+    return new Observable(observer => {
+      // First get the player by ID to access their match relationships
+      this.pubgClient.players.getPlayerById(playerId)
+        .then(playerResponse => {
+          const player = playerResponse.data[0] || playerResponse.data;
+
+          // Extract match IDs from player relationships
+          const matchIds = player.relationships?.matches?.data?.map((match: any) => match.id) || [];
+
+          if (matchIds.length === 0) {
+            this.setCache(cacheKey, []);
+            observer.next([]);
+            observer.complete();
+            return;
+          }
+
+          // Fetch all matches in parallel (limit to recent 10 for performance)
+          const recentMatchIds = matchIds.slice(0, 10);
+          const matchPromises = recentMatchIds.map((matchId: string) =>
+            this.pubgClient.matches.getMatch(matchId)
+              .then(matchResponse => matchResponse.data)
+              .catch(error => {
+                console.warn(`Failed to fetch match ${matchId}:`, error);
+                return null; // Return null for failed matches
+              })
+          );
+
+          Promise.all(matchPromises)
+            .then((matches: (Match | null)[]) => {
+              const validMatches = matches.filter((match: Match | null) => match !== null) as Match[];
+              this.setCache(cacheKey, validMatches);
+              observer.next(validMatches);
+              observer.complete();
+            })
+            .catch(error => {
+              console.error('Error fetching matches:', error);
+              observer.error(new Error(`Failed to fetch matches: ${error.message}`));
+            });
+        })
+        .catch(error => {
+          console.error('Error fetching player matches:', error);
+          observer.error(new Error(`Failed to fetch player matches: ${error.message}`));
+        });
+    });
   }
 
   getPlayerSeasonStats(playerId: string, seasonId: string, shard: ApiShard = 'pc-na' as ApiShard): Observable<any> {
@@ -140,19 +167,18 @@ export class PubgApiService {
       return of(cached);
     }
 
-    const url = `${this.baseUrl}/shards/${shard}/players/${playerId}/seasons/${seasonId}`;
-    
-    return this.http.get<any>(url, { headers: this.getHeaders() }).pipe(
-      retry(2),
-      map(stats => {
-        this.setCache(cacheKey, stats);
-        return stats;
-      }),
-      catchError(error => {
-        console.error('Error fetching player season stats:', error);
-        return throwError(() => new Error(`Failed to fetch player season stats: ${error.message}`));
-      })
-    );
+    return new Observable(observer => {
+      this.pubgClient.players.getPlayerSeasonStats({ playerId, seasonId })
+        .then(stats => {
+          this.setCache(cacheKey, stats);
+          observer.next(stats);
+          observer.complete();
+        })
+        .catch(error => {
+          console.error('Error fetching player season stats:', error);
+          observer.error(new Error(`Failed to fetch player season stats: ${error.message}`));
+        });
+    });
   }
 
   clearCache(): void {
@@ -164,18 +190,5 @@ export class PubgApiService {
       size: this.cache.size,
       keys: Array.from(this.cache.keys())
     };
-  }
-
-  private getPlayerByAccountId(playerId: string, shard: ApiShard): Observable<Player> {
-    const url = `${this.baseUrl}/shards/${shard}/players/${playerId}`;
-    
-    return this.http.get<{ data: Player }>(url, { headers: this.getHeaders() }).pipe(
-      retry(2),
-      map(response => response.data),
-      catchError(error => {
-        console.error('Error fetching player by account ID:', error);
-        return throwError(() => new Error(`Failed to fetch player by account ID: ${error.message}`));
-      })
-    );
   }
 }

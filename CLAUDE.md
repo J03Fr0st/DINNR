@@ -105,9 +105,17 @@ ng lint --fix       # Fix linting issues
 ## API Integration
 
 ### PUBG API Usage
-- Initialize: `new PubgClient({ apiKey: 'your-key', shard: 'pc-na' })`
-- Key methods: `getPlayerByName()`, `getMatch()`, `getTelemetryData()`
-- Rate limiting: 10 requests/minute, 600/hour
+- **Implementation**: Direct HTTP calls via Angular HttpClient
+- **Type Safety**: Uses @j03fr0st/pubg-ts types for TypeScript support
+- **Rate Limiting**: 10 requests/minute, 600/hour (handled by the service)
+- **Caching**: In-memory caching with configurable TTL
+
+### Available Methods
+- `getPlayerByName(playerName, shard)`: Get player data by name
+- `getMatch(matchId, shard)`: Get match data by ID
+- `getTelemetry(telemetryUrl)`: Get telemetry events from match
+- `getPlayerMatches(playerId, shard)`: Get all matches for a player
+- `getPlayerSeasonStats(playerId, seasonId, shard)`: Get seasonal statistics
 
 ### Data Processing Pipeline
 1. Fetch match data from PUBG API

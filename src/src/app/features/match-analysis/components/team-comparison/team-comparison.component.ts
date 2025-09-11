@@ -1,91 +1,42 @@
 import { Component, Input } from '@angular/core';
-import { ChartConfiguration } from 'chart.js';
 
 @Component({
   selector: 'app-team-comparison',
   template: `
     <div class="chart-container">
-      <canvas baseChart [type]="chartType" [data]="chartData" [options]="chartOptions"></canvas>
+      <div class="chart-placeholder">
+        <h3>Team Comparison Chart</h3>
+        <p>Team comparison visualization will be implemented here</p>
+        <div *ngIf="comparisonData && comparisonData.length > 0" class="data-preview">
+          <div *ngFor="let item of comparisonData" class="comparison-item">
+            {{ item.team }}: {{ item.score }}
+          </div>
+        </div>
+      </div>
     </div>
   `,
   styles: [`
     .chart-container {
       position: relative;
-      height: 400px;
+      height: 300px;
       width: 100%;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+    .chart-placeholder {
+      text-align: center;
+    }
+    .data-preview {
+      margin-top: 15px;
+      text-align: left;
+    }
+    .comparison-item {
+      padding: 5px;
+      border-bottom: 1px solid #eee;
     }
   `]
 })
 export class TeamComparisonComponent {
-  @Input() players: any[] = [];
-  
-  chartType: ChartConfiguration['type'] = 'bar';
-  chartData: ChartConfiguration['data'] = {
-    labels: [],
-    datasets: []
-  };
-  
-  chartOptions: ChartConfiguration['options'] = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'top',
-      },
-      title: {
-        display: true,
-        text: 'Team Performance Comparison'
-      }
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        title: {
-          display: true,
-          text: 'Value'
-        }
-      }
-    }
-  };
-
-  ngOnChanges() {
-    this.updateChartData();
-  }
-
-  private updateChartData() {
-    if (!this.players || this.players.length === 0) return;
-
-    this.chartData.labels = this.players.map(player => player.name);
-    
-    this.chartData.datasets = [
-      {
-        label: 'Kills',
-        data: this.players.map(player => player.stats.kills),
-        backgroundColor: 'rgba(255, 99, 132, 0.8)',
-        borderColor: 'rgba(255, 99, 132, 1)',
-        borderWidth: 1
-      },
-      {
-        label: 'Damage',
-        data: this.players.map(player => Math.round(player.stats.damageDealt)),
-        backgroundColor: 'rgba(54, 162, 235, 0.8)',
-        borderColor: 'rgba(54, 162, 235, 1)',
-        borderWidth: 1
-      },
-      {
-        label: 'Survival Time (min)',
-        data: this.players.map(player => Math.round(player.stats.survivalTime / 60)),
-        backgroundColor: 'rgba(255, 206, 86, 0.8)',
-        borderColor: 'rgba(255, 206, 86, 1)',
-        borderWidth: 1
-      },
-      {
-        label: 'Placement',
-        data: this.players.map(player => player.stats.placement),
-        backgroundColor: 'rgba(75, 192, 192, 0.8)',
-        borderColor: 'rgba(75, 192, 192, 1)',
-        borderWidth: 1
-      }
-    ];
-  }
+  @Input() comparisonData: any[] = [];
 }

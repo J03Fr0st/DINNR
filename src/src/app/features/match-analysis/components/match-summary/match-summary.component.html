@@ -4,24 +4,24 @@
       <mat-card-title>Match Summary</mat-card-title>
       <mat-card-subtitle>Overview of match details and results</mat-card-subtitle>
     </mat-card-header>
-    
+
     <mat-card-content *ngIf="summary">
       <div class="summary-grid">
         <div class="summary-item">
           <mat-icon class="summary-icon">map</mat-icon>
           <div class="summary-content">
             <div class="summary-label">Map</div>
-            <div class="summary-value" [style.color]="getMapColor(summary.map)">
-              {{ summary.map }}
+            <div class="summary-value" [style.color]="getMapColor(summary?.map || '')">
+              {{ summary?.map || 'Unknown' }}
             </div>
           </div>
         </div>
 
         <div class="summary-item">
-          <mat-icon class="summary-icon">{{ getGameModeIcon(summary.gameMode) }}</mat-icon>
+          <mat-icon class="summary-icon">{{ getGameModeIcon(summary?.gameMode || '') }}</mat-icon>
           <div class="summary-content">
             <div class="summary-label">Game Mode</div>
-            <div class="summary-value">{{ summary.gameMode.toUpperCase() }}</div>
+            <div class="summary-value">{{ (summary?.gameMode || 'unknown').toUpperCase() }}</div>
           </div>
         </div>
 
@@ -29,7 +29,7 @@
           <mat-icon class="summary-icon">timer</mat-icon>
           <div class="summary-content">
             <div class="summary-label">Duration</div>
-            <div class="summary-value">{{ formatTime(summary.matchDuration) }}</div>
+            <div class="summary-value">{{ formatTime(summary?.matchDuration || 0) }}</div>
           </div>
         </div>
 
@@ -37,7 +37,7 @@
           <mat-icon class="summary-icon">groups</mat-icon>
           <div class="summary-content">
             <div class="summary-label">Total Players</div>
-            <div class="summary-value">{{ summary.totalPlayers }}</div>
+            <div class="summary-value">{{ summary?.totalPlayers || 0 }}</div>
           </div>
         </div>
       </div>
@@ -64,19 +64,19 @@
         <h3>Match Statistics</h3>
         <div class="stats-grid">
           <div class="stat-card">
-            <div class="stat-number">{{ summary.totalPlayers }}</div>
+            <div class="stat-number">{{ summary?.totalPlayers || 0 }}</div>
             <div class="stat-label">Players Started</div>
           </div>
           <div class="stat-card">
-            <div class="stat-number">{{ formatTime(summary.matchDuration) }}</div>
+            <div class="stat-number">{{ formatTime(summary?.matchDuration || 0) }}</div>
             <div class="stat-label">Match Duration</div>
           </div>
           <div class="stat-card">
-            <div class="stat-number">{{ summary.map }}</div>
+            <div class="stat-number">{{ summary?.map || 'Unknown' }}</div>
             <div class="stat-label">Battlefield</div>
           </div>
           <div class="stat-card">
-            <div class="stat-number">{{ summary.gameMode }}</div>
+            <div class="stat-number">{{ summary?.gameMode || 'Unknown' }}</div>
             <div class="stat-label">Mode</div>
           </div>
         </div>
