@@ -1,8 +1,8 @@
 import { Component, Input } from '@angular/core';
 
 @Component({
-  selector: 'app-kill-timeline',
-  template: `
+    selector: 'app-kill-timeline',
+    template: `
     <div class="chart-container">
       <div class="chart-placeholder">
         <h3>Kill Timeline Chart</h3>
@@ -15,7 +15,7 @@ import { Component, Input } from '@angular/core';
       </div>
     </div>
   `,
-  styles: [`
+    styles: [`
     .chart-container {
       position: relative;
       height: 300px;
@@ -35,7 +35,8 @@ import { Component, Input } from '@angular/core';
       padding: 5px;
       border-bottom: 1px solid #eee;
     }
-  `]
+  `],
+    standalone: false
 })
 export class KillTimelineComponent {
   @Input() timelineData: any[] = [];

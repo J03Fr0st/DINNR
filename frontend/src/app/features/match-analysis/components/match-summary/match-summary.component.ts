@@ -2,9 +2,10 @@ import { Component, Input } from '@angular/core';
 import { MatchSummary } from '../../../../core/models/index';
 
 @Component({
-  selector: 'app-match-summary',
-  templateUrl: './match-summary.component.html',
-  styleUrls: ['./match-summary.component.scss']
+    selector: 'app-match-summary',
+    templateUrl: './match-summary.component.html',
+    styleUrls: ['./match-summary.component.scss'],
+    standalone: false
 })
 export class MatchSummaryComponent {
   @Input() summary: MatchSummary | null = null;

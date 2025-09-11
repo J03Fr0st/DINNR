@@ -2,9 +2,10 @@ import { Component, Input } from '@angular/core';
 import { AnalysisInsights } from '../../../../core/models/index';
 
 @Component({
-  selector: 'app-insights',
-  templateUrl: './insights.component.html',
-  styleUrls: ['./insights.component.scss']
+    selector: 'app-insights',
+    templateUrl: './insights.component.html',
+    styleUrls: ['./insights.component.scss'],
+    standalone: false
 })
 export class InsightsComponent {
   @Input() insights: AnalysisInsights | null = null;

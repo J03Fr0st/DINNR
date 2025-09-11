@@ -2,9 +2,10 @@ import { Component, Input } from '@angular/core';
 import { PlayerAnalysis, WeaponStats } from '../../../../core/models/index';
 
 @Component({
-  selector: 'app-player-stats',
-  templateUrl: './player-stats.component.html',
-  styleUrls: ['./player-stats.component.scss']
+    selector: 'app-player-stats',
+    templateUrl: './player-stats.component.html',
+    styleUrls: ['./player-stats.component.scss'],
+    standalone: false
 })
 export class PlayerStatsComponent {
   @Input() players: PlayerAnalysis[] = [];

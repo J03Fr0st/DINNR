@@ -20,9 +20,10 @@ interface PlayerAnalysis {
 }
 
 @Component({
-  selector: 'app-match-input',
-  templateUrl: './match-input.component.html',
-  styleUrls: ['./match-input.component.scss']
+    selector: 'app-match-input',
+    templateUrl: './match-input.component.html',
+    styleUrls: ['./match-input.component.scss'],
+    standalone: false
 })
 export class MatchInputComponent implements OnInit {
   playerForm!: FormGroup;
