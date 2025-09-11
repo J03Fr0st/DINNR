@@ -22,6 +22,8 @@ interface PlayerAnalysis {
   region: string;
   stats: PlayerStats;
   insights: PlayerInsight[];
+  performanceData?: any[];
+  timelineData?: any[];
 }
 
 @Component({
@@ -87,16 +89,20 @@ export class MatchInputComponent implements OnInit {
 
   private processPlayerData(player: Player, matches: any[]): void {
     console.log('Processing player data...');
-    
+
     // Calculate stats from recent matches
     const stats = this.calculateStatsFromMatches(player, matches);
     const insights = this.generateInsights(stats);
+    const performanceData = this.generatePerformanceData(stats);
+    const timelineData = this.generateTimelineData(matches, player.id);
 
     this.analysis = {
       playerName: player.attributes.name || 'Unknown',
       region: 'Steam', // Default since all queries use the steam shard
       stats: stats,
-      insights: insights
+      insights: insights,
+      performanceData: performanceData,
+      timelineData: timelineData
     };
 
     console.log('Final analysis object:', this.analysis);
@@ -105,7 +111,7 @@ export class MatchInputComponent implements OnInit {
 
   private calculateStatsFromMatches(player: Player, matches: any[]): PlayerStats {
     console.log('Calculating stats from matches:', matches);
-    
+
     if (!matches || matches.length === 0) {
       return {
         kills: 0,
@@ -122,12 +128,12 @@ export class MatchInputComponent implements OnInit {
     let validMatches = 0;
 
     const playerId = player.id;
-    
+
     matches.forEach(matchResponse => {
       try {
         // Find the participant data for this player in the included data
-        const participantData = matchResponse.included?.find((inc: any) => 
-          inc.type === 'participant' && 
+        const participantData = matchResponse.included?.find((inc: any) =>
+          inc.type === 'participant' &&
           inc.attributes?.stats?.playerId === playerId
         );
 
@@ -235,6 +241,48 @@ export class MatchInputComponent implements OnInit {
       console.error('Export failed:', error);
       this.snackBar.open('Failed to export analysis', 'Close', { duration: 3000 });
     }
+  }
+
+  private generatePerformanceData(stats: PlayerStats): any[] {
+    return [
+      { metric: 'Total Kills', value: stats.kills },
+      { metric: 'Wins', value: stats.wins },
+      { metric: 'K/D Ratio', value: stats.kdRatio.toFixed(2) },
+      { metric: 'Avg Damage', value: stats.damagePerMatch.toFixed(0) }
+    ];
+  }
+
+  private generateTimelineData(matches: any[], playerId: string): any[] {
+    const timelineEvents: any[] = [];
+
+    matches.slice(0, 10).forEach((matchResponse, index) => {
+      try {
+        const participantData = matchResponse.included?.find((inc: any) =>
+          inc.type === 'participant' &&
+          inc.attributes?.stats?.playerId === playerId
+        );
+
+        if (participantData?.attributes?.stats) {
+          const stats = participantData.attributes.stats;
+          const matchData = matchResponse.data?.attributes;
+          const createdAtIso = matchData?.createdAt || matchData?.createdAtISO || null;
+          const createdDate = createdAtIso ? new Date(createdAtIso) : null;
+
+          timelineEvents.push({
+            matchNumber: index + 1,
+            kills: stats.kills || 0,
+            rank: stats.winPlace ?? 'N/A',
+            mode: matchData?.gameMode || 'Unknown',
+            date: createdDate ? createdDate.toLocaleDateString() : '—',
+            time: createdDate ? createdDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '—'
+          });
+        }
+      } catch (error) {
+        console.warn('Error processing match for timeline:', error);
+      }
+    });
+
+    return timelineEvents;
   }
 
   resetForm(): void {
