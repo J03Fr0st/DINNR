@@ -1,28 +1,28 @@
-import { Injectable } from '@angular/core';
+import { Injectable } from "@angular/core";
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: "root",
 })
 export class StorageService {
-  private readonly PREFIX = 'dinnr_';
+  private readonly PREFIX = "dinnr_";
 
   set<T>(key: string, value: T, ttl?: number): void {
     const fullKey = this.PREFIX + key;
     const item = {
       value,
       timestamp: Date.now(),
-      ttl: ttl || null
+      ttl: ttl || null,
     };
-    
+
     try {
       localStorage.setItem(fullKey, JSON.stringify(item));
     } catch (error) {
-      console.error('Error saving to localStorage:', error);
+      console.error("Error saving to localStorage:", error);
       this.clearExpired();
       try {
         localStorage.setItem(fullKey, JSON.stringify(item));
       } catch (error) {
-        console.error('Still unable to save to localStorage after cleanup:', error);
+        console.error("Still unable to save to localStorage after cleanup:", error);
       }
     }
   }
@@ -34,7 +34,7 @@ export class StorageService {
       if (!item) return null;
 
       const parsed = JSON.parse(item);
-      
+
       if (this.isExpired(parsed)) {
         localStorage.removeItem(fullKey);
         return null;
@@ -42,7 +42,7 @@ export class StorageService {
 
       return parsed.value;
     } catch (error) {
-      console.error('Error reading from localStorage:', error);
+      console.error("Error reading from localStorage:", error);
       return null;
     }
   }
@@ -52,13 +52,13 @@ export class StorageService {
     try {
       localStorage.removeItem(fullKey);
     } catch (error) {
-      console.error('Error removing from localStorage:', error);
+      console.error("Error removing from localStorage:", error);
     }
   }
 
   clear(): void {
     const keysToRemove: string[] = [];
-    
+
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key && key.startsWith(this.PREFIX)) {
@@ -66,18 +66,18 @@ export class StorageService {
       }
     }
 
-    keysToRemove.forEach(key => {
+    keysToRemove.forEach((key) => {
       try {
         localStorage.removeItem(key);
       } catch (error) {
-        console.error('Error removing item from localStorage:', error);
+        console.error("Error removing item from localStorage:", error);
       }
     });
   }
 
   clearExpired(): void {
     const keysToRemove: string[] = [];
-    
+
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key && key.startsWith(this.PREFIX)) {
@@ -95,11 +95,11 @@ export class StorageService {
       }
     }
 
-    keysToRemove.forEach(key => {
+    keysToRemove.forEach((key) => {
       try {
         localStorage.removeItem(key);
       } catch (error) {
-        console.error('Error removing expired item from localStorage:', error);
+        console.error("Error removing expired item from localStorage:", error);
       }
     });
   }
@@ -114,7 +114,7 @@ export class StorageService {
       if (key && key.startsWith(this.PREFIX)) {
         total++;
         size += key.length + (localStorage.getItem(key)?.length || 0);
-        
+
         try {
           const item = localStorage.getItem(key);
           if (item) {
@@ -132,7 +132,7 @@ export class StorageService {
     return {
       total,
       expired,
-      size: this.formatBytes(size)
+      size: this.formatBytes(size),
     };
   }
 
@@ -142,18 +142,18 @@ export class StorageService {
   }
 
   private formatBytes(bytes: number): string {
-    if (bytes === 0) return '0 Bytes';
-    
+    if (bytes === 0) return "0 Bytes";
+
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   }
 
   isAvailable(): boolean {
     try {
-      const testKey = '__test__';
+      const testKey = "__test__";
       localStorage.setItem(testKey, testKey);
       localStorage.removeItem(testKey);
       return true;

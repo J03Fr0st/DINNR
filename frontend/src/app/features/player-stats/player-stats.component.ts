@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Component, OnInit } from "@angular/core";
+import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 
 @Component({
-  selector: 'app-player-stats',
+  selector: "app-player-stats",
   template: `
     <div class="player-stats-container">
       <div class="page-header">
@@ -68,7 +68,8 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
       </mat-card>
     </div>
   `,
-  styles: [`
+  styles: [
+    `
     .player-stats-container {
       max-width: 1200px;
       margin: 0 auto;
@@ -181,8 +182,9 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
         text-align: center;
       }
     }
-  `],
-  standalone: false
+  `,
+  ],
+  standalone: false,
 })
 export class PlayerStatsComponent implements OnInit {
   playerForm!: FormGroup;
@@ -191,7 +193,7 @@ export class PlayerStatsComponent implements OnInit {
 
   ngOnInit(): void {
     this.playerForm = this.fb.group({
-      playerName: ['', [Validators.required, Validators.minLength(2)]]
+      playerName: ["", [Validators.required, Validators.minLength(2)]],
     });
   }
 

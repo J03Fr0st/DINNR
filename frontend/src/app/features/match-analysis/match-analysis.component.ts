@@ -1,9 +1,9 @@
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Component, OnInit } from "@angular/core";
+import { ActivatedRoute } from "@angular/router";
+import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 
 @Component({
-  selector: 'app-match-analysis',
+  selector: "app-match-analysis",
   template: `
     <div class="match-analysis-container">
       <div class="page-header">
@@ -80,7 +80,8 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
       </mat-card>
     </div>
   `,
-  styles: [`
+  styles: [
+    `
     .match-analysis-container {
       max-width: 1200px;
       margin: 0 auto;
@@ -196,8 +197,9 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
         text-align: center;
       }
     }
-  `],
-  standalone: false
+  `,
+  ],
+  standalone: false,
 })
 export class MatchAnalysisComponent implements OnInit {
   matchForm!: FormGroup;
@@ -205,28 +207,26 @@ export class MatchAnalysisComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private fb: FormBuilder
+    private fb: FormBuilder,
   ) {}
 
   ngOnInit(): void {
     this.matchForm = this.fb.group({
-      matchId: ['', [Validators.required]],
-      playerNames: ['', [Validators.required]]
+      matchId: ["", [Validators.required]],
+      playerNames: ["", [Validators.required]],
     });
 
     // Check for query parameters
-    this.route.queryParams.subscribe(params => {
-      if (params['matchId']) {
+    this.route.queryParams.subscribe((params) => {
+      if (params["matchId"]) {
         this.matchForm.patchValue({
-          matchId: params['matchId']
+          matchId: params["matchId"],
         });
       }
-      if (params['players']) {
-        const players = Array.isArray(params['players']) 
-          ? params['players'].join(', ')
-          : params['players'];
+      if (params["players"]) {
+        const players = Array.isArray(params["players"]) ? params["players"].join(", ") : params["players"];
         this.matchForm.patchValue({
-          playerNames: players
+          playerNames: players,
         });
       }
     });

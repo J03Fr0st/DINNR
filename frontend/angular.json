@@ -27,26 +27,16 @@
             "outputPath": "dist/dinnr-app",
             "index": "src/index.html",
             "browser": "src/main.ts",
-            "polyfills": [
-              "zone.js"
-            ],
+            "polyfills": ["zone.js"],
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
-            "assets": [
-              "src/favicon.ico",
-              "src/assets"
-            ],
-            "styles": [
-              "src/styles.scss",
-              "src/assets/css/fontawesome.min.css"
-            ],
+            "assets": ["src/favicon.ico", "src/assets"],
+            "styles": ["src/styles.scss", "src/assets/css/fontawesome.min.css"],
             "scripts": []
           },
           "configurations": {
             "production": {
-              "allowedCommonJsDependencies": [
-                "@j03fr0st/pubg-ts"
-              ],
+              "allowedCommonJsDependencies": ["@j03fr0st/pubg-ts"],
               "budgets": [
                 {
                   "type": "initial",
@@ -104,20 +94,11 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "polyfills": [
-              "zone.js",
-              "zone.js/testing"
-            ],
+            "polyfills": ["zone.js", "zone.js/testing"],
             "tsConfig": "tsconfig.spec.json",
             "inlineStyleLanguage": "scss",
-            "assets": [
-              "src/favicon.ico",
-              "src/assets"
-            ],
-            "styles": [
-              "src/styles.scss",
-              "src/assets/css/fontawesome.min.css"
-            ],
+            "assets": ["src/favicon.ico", "src/assets"],
+            "styles": ["src/styles.scss", "src/assets/css/fontawesome.min.css"],
             "scripts": []
           }
         }

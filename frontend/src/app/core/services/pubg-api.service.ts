@@ -1,12 +1,12 @@
-import { Injectable } from '@angular/core';
-import { Observable, of, throwError, forkJoin } from 'rxjs';
-import { map, catchError, switchMap } from 'rxjs/operators';
-import { environment } from '../../../environments/environment';
-import { PubgClient } from '@j03fr0st/pubg-ts';
-import { Player, Match, TelemetryEvent, Shard as ApiShard, MatchResponse } from '../models';
+import { Injectable } from "@angular/core";
+import { Observable, of, throwError, forkJoin } from "rxjs";
+import { map, catchError, switchMap } from "rxjs/operators";
+import { environment } from "../../../environments/environment";
+import { PubgClient } from "@j03fr0st/pubg-ts";
+import { Player, Match, TelemetryEvent, Shard as ApiShard, MatchResponse } from "../models";
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: "root",
 })
 export class PubgApiService {
   private readonly pubgClient: PubgClient;
@@ -16,10 +16,9 @@ export class PubgApiService {
   constructor() {
     this.pubgClient = new PubgClient({
       apiKey: environment.pubgApiKey,
-      shard: 'steam'
+      shard: "steam",
     });
   }
-
 
   private getCacheKey(endpoint: string, params: any = {}): string {
     return `${endpoint}-${JSON.stringify(params)}`;
@@ -45,9 +44,10 @@ export class PubgApiService {
       return of(cached);
     }
 
-    return new Observable(observer => {
-      this.pubgClient.players.getPlayerByName(playerName)
-        .then(response => {
+    return new Observable((observer) => {
+      this.pubgClient.players
+        .getPlayerByName(playerName)
+        .then((response) => {
           if (response.data && response.data.length > 0) {
             const player = response.data[0];
             this.setCache(cacheKey, player);
@@ -57,8 +57,8 @@ export class PubgApiService {
             observer.error(new Error(`Player '${playerName}' not found`));
           }
         })
-        .catch(error => {
-          console.error('Error fetching player:', error);
+        .catch((error) => {
+          console.error("Error fetching player:", error);
           observer.error(new Error(`Failed to fetch player '${playerName}': ${error.message}`));
         });
     });
@@ -71,16 +71,17 @@ export class PubgApiService {
       return of(cached);
     }
 
-    return new Observable(observer => {
-      this.pubgClient.matches.getMatch(matchId)
-        .then(response => {
+    return new Observable((observer) => {
+      this.pubgClient.matches
+        .getMatch(matchId)
+        .then((response) => {
           const match = response.data;
           this.setCache(cacheKey, match);
           observer.next(match);
           observer.complete();
         })
-        .catch(error => {
-          console.error('Error fetching match:', error);
+        .catch((error) => {
+          console.error("Error fetching match:", error);
           observer.error(new Error(`Failed to fetch match '${matchId}': ${error.message}`));
         });
     });
@@ -93,15 +94,16 @@ export class PubgApiService {
       return of(cached);
     }
 
-    return new Observable(observer => {
-      this.pubgClient.telemetry.getTelemetryData(telemetryUrl)
-        .then(events => {
+    return new Observable((observer) => {
+      this.pubgClient.telemetry
+        .getTelemetryData(telemetryUrl)
+        .then((events) => {
           this.setCache(cacheKey, events);
           observer.next(events);
           observer.complete();
         })
-        .catch(error => {
-          console.error('Error fetching telemetry:', error);
+        .catch((error) => {
+          console.error("Error fetching telemetry:", error);
           observer.error(new Error(`Failed to fetch telemetry: ${error.message}`));
         });
     });
@@ -114,10 +116,11 @@ export class PubgApiService {
       return of(cached);
     }
 
-    return new Observable(observer => {
+    return new Observable((observer) => {
       // First get the player by ID to access their match relationships
-      this.pubgClient.players.getPlayerById(playerId)
-        .then(playerResponse => {
+      this.pubgClient.players
+        .getPlayerById(playerId)
+        .then((playerResponse) => {
           const player = playerResponse.data[0] || playerResponse.data;
 
           // Extract match IDs from player relationships
@@ -133,12 +136,13 @@ export class PubgApiService {
           // Fetch all matches in parallel (limit to recent 10 for performance)
           const recentMatchIds = matchIds.slice(0, 10);
           const matchPromises = recentMatchIds.map((matchId: string) =>
-            this.pubgClient.matches.getMatch(matchId)
-              .then(matchResponse => matchResponse) // Return full response, not just data
-              .catch(error => {
+            this.pubgClient.matches
+              .getMatch(matchId)
+              .then((matchResponse) => matchResponse) // Return full response, not just data
+              .catch((error) => {
                 console.warn(`Failed to fetch match ${matchId}:`, error);
                 return null; // Return null for failed matches
-              })
+              }),
           );
 
           Promise.all(matchPromises)
@@ -148,13 +152,13 @@ export class PubgApiService {
               observer.next(validMatches);
               observer.complete();
             })
-            .catch(error => {
-              console.error('Error fetching matches:', error);
+            .catch((error) => {
+              console.error("Error fetching matches:", error);
               observer.error(new Error(`Failed to fetch matches: ${error.message}`));
             });
         })
-        .catch(error => {
-          console.error('Error fetching player matches:', error);
+        .catch((error) => {
+          console.error("Error fetching player matches:", error);
           observer.error(new Error(`Failed to fetch player matches: ${error.message}`));
         });
     });
@@ -167,15 +171,16 @@ export class PubgApiService {
       return of(cached);
     }
 
-    return new Observable(observer => {
-      this.pubgClient.players.getPlayerSeasonStats({ playerId, seasonId })
-        .then(stats => {
+    return new Observable((observer) => {
+      this.pubgClient.players
+        .getPlayerSeasonStats({ playerId, seasonId })
+        .then((stats) => {
           this.setCache(cacheKey, stats);
           observer.next(stats);
           observer.complete();
         })
-        .catch(error => {
-          console.error('Error fetching player season stats:', error);
+        .catch((error) => {
+          console.error("Error fetching player season stats:", error);
           observer.error(new Error(`Failed to fetch player season stats: ${error.message}`));
         });
     });
@@ -188,7 +193,7 @@ export class PubgApiService {
   getCacheStats(): { size: number; keys: string[] } {
     return {
       size: this.cache.size,
-      keys: Array.from(this.cache.keys())
+      keys: Array.from(this.cache.keys()),
     };
   }
 }

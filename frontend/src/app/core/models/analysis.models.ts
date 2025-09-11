@@ -1,4 +1,4 @@
-import type { Match, Participant, Player } from '@j03fr0st/pubg-ts';
+import type { Match, Participant, Player } from "@j03fr0st/pubg-ts";
 
 export interface MatchAnalysis {
   matchId: string;
@@ -89,7 +89,7 @@ export interface AnalysisInsights {
 
 export interface KeyMoment {
   timestamp: number;
-  type: 'kill' | 'death' | 'revive' | 'escape' | 'zone_close';
+  type: "kill" | "death" | "revive" | "escape" | "zone_close";
   description: string;
   impact: number;
   players: string[];

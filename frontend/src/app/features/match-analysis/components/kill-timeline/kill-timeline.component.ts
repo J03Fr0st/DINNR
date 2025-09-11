@@ -1,8 +1,8 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input } from "@angular/core";
 
 @Component({
-    selector: 'app-kill-timeline',
-    template: `
+  selector: "app-kill-timeline",
+  template: `
     <div class="timeline-container">
       <table class="timeline-table" *ngIf="timelineData && timelineData.length; else empty">
         <thead>
@@ -31,7 +31,8 @@ import { Component, Input } from '@angular/core';
       </ng-template>
     </div>
   `,
-    styles: [`
+  styles: [
+    `
     .timeline-container { width: 100%; }
     .timeline-table { width: 100%; border-collapse: collapse; }
     .timeline-table th,
@@ -39,8 +40,9 @@ import { Component, Input } from '@angular/core';
     .timeline-table th { text-align: left; font-weight: 600; color: #ddd; background: rgba(255,255,255,0.03); }
     .timeline-table tr:hover td { background: rgba(255,255,255,0.03); }
     .empty-state { text-align: center; padding: 16px; color: #aaa; }
-  `],
-    standalone: false
+  `,
+  ],
+  standalone: false,
 })
 export class KillTimelineComponent {
   @Input() timelineData: any[] = [];

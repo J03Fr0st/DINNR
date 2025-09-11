@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
+import { Component } from "@angular/core";
 
 @Component({
-  selector: 'app-home',
+  selector: "app-home",
   template: `
     <div class="hero-section">
       <div class="hero-content">
@@ -50,7 +50,8 @@ import { Component } from '@angular/core';
       </div>
     </div>
   `,
-  styles: [`
+  styles: [
+    `
     .hero-section {
       text-align: center;
       padding: 80px 20px;
@@ -128,7 +129,8 @@ import { Component } from '@angular/core';
         grid-template-columns: 1fr;
       }
     }
-  `],
-  standalone: false
+  `,
+  ],
+  standalone: false,
 })
-export class HomeComponent { }
+export class HomeComponent {}
