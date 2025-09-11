@@ -1,23 +1,51 @@
 import { Injectable } from "@angular/core";
-import { Observable, of, throwError } from "rxjs";
-import { map, catchError, switchMap } from "rxjs/operators";
-import { PubgApiService } from "./pubg-api.service";
+import { type Observable, of, throwError } from "rxjs";
+import { catchError, map, switchMap } from "rxjs/operators";
 import {
-  TelemetryEvent,
-  LogPlayerPosition,
-  LogPlayerKill,
-  Location as TelemetryLocation,
-  Match,
   Shard as ApiShard,
+  type LogPlayerKill,
+  type LogPlayerPosition,
+  type Match,
+  type TelemetryEvent,
+  type Location as TelemetryLocation,
 } from "../models";
-import {
-  MatchAnalysis,
-  PlayerAnalysis,
-  PlayerMatchStats,
-  PlayerInsights,
-  MatchSummary,
+import type {
   AnalysisInsights,
+  MatchAnalysis,
+  MatchSummary,
+  PlayerAnalysis,
+  PlayerInsights,
+  PlayerMatchStats,
 } from "../models/analysis.models";
+import { PubgApiService } from "./pubg-api.service";
+
+interface WeaponStats {
+  kills: number;
+  damage: number;
+  hits: number;
+  headshots: number;
+  accuracy: number;
+}
+
+interface PlayerTimelineEvent {
+  time: number;
+  event: string;
+  position?: TelemetryLocation;
+  details?: {
+    killer: string;
+    victim: string;
+    weapon: string;
+    distance: number;
+  };
+}
+
+interface KeyMoment {
+  timestamp: number;
+  type: "kill" | "death" | "revive" | "escape" | "zone_close";
+  description: string;
+  impact: number;
+  players: string[];
+}
 
 @Injectable({
   providedIn: "root",
@@ -28,8 +56,9 @@ export class TelemetryService {
   analyzeMatch(matchId: string, playerNames: string[]): Observable<MatchAnalysis> {
     return this.pubgApiService.getMatch(matchId).pipe(
       switchMap((match) => {
+        const telemetryUrl = this.extractTelemetryUrl(match);
         return this.pubgApiService
-          .getTelemetry((match as any).relationships?.assets?.data[0]?.attributes?.URL || "")
+          .getTelemetry(telemetryUrl)
           .pipe(
             map((telemetry) => this.processTelemetry(telemetry, playerNames, match)),
             catchError((error) => {
@@ -45,7 +74,7 @@ export class TelemetryService {
     );
   }
 
-  private processTelemetry(telemetry: TelemetryEvent[], playerNames: string[], match: any): MatchAnalysis {
+  private processTelemetry(telemetry: TelemetryEvent[], playerNames: string[], match: Match): MatchAnalysis {
     const playerAnalyses = this.analyzePlayers(telemetry, playerNames);
     const matchSummary = this.createMatchSummary(match, telemetry);
     const insights = this.generateInsights(playerAnalyses, telemetry);
@@ -103,7 +132,7 @@ export class TelemetryService {
     ) as LogPlayerKill[];
 
     const totalDamage = killEvents.reduce(
-      (sum, event) => sum + ((event as any).victimGameResult?.stats?.damageDealt || 0),
+      (sum, event) => sum + (this.extractDamageFromKillEvent(event) || 0),
       0,
     );
     const totalDistance = this.calculateTotalDistance(events, playerName);
@@ -158,7 +187,7 @@ export class TelemetryService {
   }
 
   private calculateDistance(pos1: TelemetryLocation, pos2: TelemetryLocation): number {
-    return Math.sqrt(Math.pow(pos2.x - pos1.x, 2) + Math.pow(pos2.y - pos1.y, 2) + Math.pow(pos2.z - pos1.z, 2));
+    return Math.sqrt((pos2.x - pos1.x) ** 2 + (pos2.y - pos1.y) ** 2 + (pos2.z - pos1.z) ** 2);
   }
 
   private calculateSurvivalTime(events: TelemetryEvent[], playerName: string): number {
@@ -168,8 +197,8 @@ export class TelemetryService {
     const firstEvent = playerEvents[0];
     const lastEvent = playerEvents[playerEvents.length - 1];
 
-    const firstTime = firstEvent._D ? new Date(firstEvent._D).getTime() : NaN;
-    const lastTime = lastEvent._D ? new Date(lastEvent._D).getTime() : NaN;
+    const firstTime = firstEvent._D ? new Date(firstEvent._D).getTime() : Number.NaN;
+    const lastTime = lastEvent._D ? new Date(lastEvent._D).getTime() : Number.NaN;
     if (Number.isNaN(firstTime) || Number.isNaN(lastTime)) {
       return 0;
     }
@@ -181,14 +210,14 @@ export class TelemetryService {
 
     if (deathEvent && deathEvent._T === "LogPlayerKill") {
       const killEvent = deathEvent as LogPlayerKill;
-      return (killEvent as any).victimGameResult?.stats?.rank || 1;
+      return this.extractRankFromKillEvent(killEvent) || 1;
     }
 
     return 1; // Survived to the end
   }
 
-  private analyzeWeaponUsage(killEvents: LogPlayerKill[]): any {
-    const weaponStats: any = {};
+  private analyzeWeaponUsage(killEvents: LogPlayerKill[]): Record<string, WeaponStats> {
+    const weaponStats: Record<string, WeaponStats> = {};
 
     killEvents.forEach((event) => {
       const weapon = event.damageCauserName;
@@ -202,7 +231,7 @@ export class TelemetryService {
         };
       }
       weaponStats[weapon].kills++;
-      weaponStats[weapon].damage += (event as any).victimGameResult?.stats?.damageDealt || 0;
+      weaponStats[weapon].damage += this.extractDamageFromKillEvent(event) || 0;
     });
 
     return weaponStats;
@@ -243,7 +272,7 @@ export class TelemetryService {
     };
   }
 
-  private createPlayerTimeline(events: TelemetryEvent[], playerName: string): any[] {
+  private createPlayerTimeline(events: TelemetryEvent[], playerName: string): PlayerTimelineEvent[] {
     return events.map((event) => ({
       time: event._D ? new Date(event._D).getTime() : Date.now(),
       event: event._T,
@@ -262,9 +291,8 @@ export class TelemetryService {
 
   private createMatchSummary(match: Match, telemetry: TelemetryEvent[]): MatchSummary {
     const duration = match.attributes.duration;
-    const matchStartEvent = telemetry.find((e) => e._T === "LogMatchStart") as any;
-    const totalPlayers = matchStartEvent?.characters?.length || 100;
-
+    const matchStartEvent = telemetry.find((e) => e._T === "LogMatchStart");
+    const totalPlayers = this.extractTotalPlayersFromMatchStart(matchStartEvent) || 100;
     return {
       totalPlayers,
       matchDuration: duration,
@@ -290,7 +318,7 @@ export class TelemetryService {
     };
   }
 
-  private extractKeyMoments(telemetry: TelemetryEvent[]): any[] {
+  private extractKeyMoments(telemetry: TelemetryEvent[]): KeyMoment[] {
     return telemetry
       .filter((e) => e._T === "LogPlayerKill")
       .slice(0, 10)
@@ -329,5 +357,54 @@ export class TelemetryService {
       return killEvent.killer.name === playerName ? killEvent.killer.accountId : killEvent.victim.accountId;
     }
     return playerName;
+  }
+
+  private extractTelemetryUrl(match: Match): string {
+    // Handle type-safe extraction of telemetry URL
+    const matchData = match as unknown as {
+      relationships?: {
+        assets?: {
+          data?: Array<{
+            attributes?: {
+              URL?: string;
+            };
+          }>;
+        };
+      };
+    };
+    return matchData.relationships?.assets?.data?.[0]?.attributes?.URL || "";
+  }
+
+  private extractDamageFromKillEvent(event: LogPlayerKill): number {
+    // Handle type-safe extraction of damage from kill event
+    const eventData = event as unknown as {
+      victimGameResult?: {
+        stats?: {
+          damageDealt?: number;
+        };
+      };
+    };
+    return eventData.victimGameResult?.stats?.damageDealt || 0;
+  }
+
+  private extractRankFromKillEvent(killEvent: LogPlayerKill): number {
+    // Handle type-safe extraction of rank from kill event
+    const eventData = killEvent as unknown as {
+      victimGameResult?: {
+        stats?: {
+          rank?: number;
+        };
+      };
+    };
+    return eventData.victimGameResult?.stats?.rank || 1;
+  }
+
+  private extractTotalPlayersFromMatchStart(matchStartEvent: TelemetryEvent | undefined): number {
+    if (!matchStartEvent) return 100;
+    // Handle type-safe extraction of total players from match start event
+    const eventData = matchStartEvent as unknown as {
+      characters?: unknown[];
+    };
+    return eventData.characters?.length || 100;
   }
 }

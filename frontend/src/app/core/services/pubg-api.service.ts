@@ -1,16 +1,16 @@
 import { Injectable } from "@angular/core";
-import { Observable, of, throwError, forkJoin } from "rxjs";
-import { map, catchError, switchMap } from "rxjs/operators";
-import { environment } from "../../../environments/environment";
 import { PubgClient } from "@j03fr0st/pubg-ts";
-import { Player, Match, TelemetryEvent, Shard as ApiShard, MatchResponse } from "../models";
+import { Observable, forkJoin, of, throwError } from "rxjs";
+import { catchError, map, switchMap } from "rxjs/operators";
+import { environment } from "../../../environments/environment";
+import { Shard as ApiShard, type Match, MatchResponse, type Player, type TelemetryEvent } from "../models";
 
 @Injectable({
   providedIn: "root",
 })
 export class PubgApiService {
   private readonly pubgClient: PubgClient;
-  private readonly cache = new Map<string, { data: any; timestamp: number }>();
+  private readonly cache = new Map<string, { data: unknown; timestamp: number }>();
   private readonly cacheTtl = environment.cacheTtl;
 
   constructor() {
@@ -20,7 +20,7 @@ export class PubgApiService {
     });
   }
 
-  private getCacheKey(endpoint: string, params: any = {}): string {
+  private getCacheKey(endpoint: string, params: Record<string, unknown> = {}): string {
     return `${endpoint}-${JSON.stringify(params)}`;
   }
 
@@ -33,7 +33,7 @@ export class PubgApiService {
     return null;
   }
 
-  private setCache(key: string, data: any): void {
+  private setCache(key: string, data: unknown): void {
     this.cache.set(key, { data, timestamp: Date.now() });
   }
 
@@ -109,9 +109,9 @@ export class PubgApiService {
     });
   }
 
-  getPlayerMatches(playerId: string): Observable<any[]> {
+  getPlayerMatches(playerId: string): Observable<MatchResponse[]> {
     const cacheKey = this.getCacheKey(`player-matches-${playerId}`);
-    const cached = this.getFromCache<any[]>(cacheKey);
+    const cached = this.getFromCache<MatchResponse[]>(cacheKey);
     if (cached) {
       return of(cached);
     }
@@ -124,7 +124,7 @@ export class PubgApiService {
           const player = playerResponse.data[0] || playerResponse.data;
 
           // Extract match IDs from player relationships
-          const matchIds = player.relationships?.matches?.data?.map((match: any) => match.id) || [];
+          const matchIds = player.relationships?.matches?.data?.map((match: { id: string }) => match.id) || [];
 
           if (matchIds.length === 0) {
             this.setCache(cacheKey, []);
@@ -146,8 +146,8 @@ export class PubgApiService {
           );
 
           Promise.all(matchPromises)
-            .then((matches: (any | null)[]) => {
-              const validMatches = matches.filter((match: any | null) => match !== null) as any[];
+            .then((matches: (MatchResponse | null)[]) => {
+              const validMatches = matches.filter((match: MatchResponse | null) => match !== null) as MatchResponse[];
               this.setCache(cacheKey, validMatches);
               observer.next(validMatches);
               observer.complete();
@@ -164,9 +164,9 @@ export class PubgApiService {
     });
   }
 
-  getPlayerSeasonStats(playerId: string, seasonId: string): Observable<any> {
+  getPlayerSeasonStats(playerId: string, seasonId: string): Observable<unknown> {
     const cacheKey = this.getCacheKey(`player-season-stats-${playerId}-${seasonId}`);
-    const cached = this.getFromCache<any>(cacheKey);
+    const cached = this.getFromCache<unknown>(cacheKey);
     if (cached) {
       return of(cached);
     }

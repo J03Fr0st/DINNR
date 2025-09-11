@@ -123,5 +123,11 @@ export interface PlayerTimeline {
   time: number;
   event: string;
   position?: { x: number; y: number; z: number };
-  details?: any;
+  details?: {
+    killer?: string;
+    victim?: string;
+    weapon?: string;
+    distance?: number;
+    [key: string]: unknown;
+  };
 }

@@ -1,5 +1,5 @@
 import { Component, Input } from "@angular/core";
-import { MatchSummary } from "../../../../core/models/index";
+import type { MatchSummary } from "../../../../core/models/index";
 
 @Component({
   selector: "app-match-summary",

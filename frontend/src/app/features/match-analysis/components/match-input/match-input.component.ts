@@ -1,9 +1,9 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, type OnInit } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { MatSnackBar } from "@angular/material/snack-bar";
-import { finalize, switchMap, map } from "rxjs/operators";
+import { finalize, map, switchMap } from "rxjs/operators";
+import { Match, MatchResponse, Participant, ParticipantAttributes, type Player } from "../../../../core/models";
 import { PubgApiService } from "../../../../core/services";
-import { Player, Match, MatchResponse, Participant } from "../../../../core/models";
 
 interface PlayerStats {
   kills: number;
@@ -17,13 +17,29 @@ interface PlayerInsight {
   description: string;
 }
 
+interface PerformanceMetric {
+  metric: string;
+  value: string | number;
+}
+
+interface TimelineEvent {
+  matchNumber: number;
+  matchId?: string;
+  playerName?: string;
+  kills: number;
+  rank: string | number;
+  mode: string;
+  date: string;
+  time: string;
+}
+
 interface PlayerAnalysis {
   playerName: string;
   region: string;
   stats: PlayerStats;
   insights: PlayerInsight[];
-  performanceData?: any[];
-  timelineData?: any[];
+  performanceData?: PerformanceMetric[];
+  timelineData?: TimelineEvent[];
 }
 
 @Component({
@@ -74,7 +90,7 @@ export class MatchInputComponent implements OnInit {
         }),
       )
       .subscribe({
-        next: ({ player, matches }: { player: Player; matches: any[] }) => {
+        next: ({ player, matches }: { player: Player; matches: MatchResponse[] }) => {
           console.log("Player and matches received:", { player, matches });
           // Get player stats and create analysis
           this.processPlayerData(player, matches);
@@ -86,7 +102,7 @@ export class MatchInputComponent implements OnInit {
       });
   }
 
-  private processPlayerData(player: Player, matches: any[]): void {
+  private processPlayerData(player: Player, matches: MatchResponse[]): void {
     console.log("Processing player data...");
 
     // Calculate stats from recent matches
@@ -108,7 +124,7 @@ export class MatchInputComponent implements OnInit {
     this.snackBar.open("Player analysis completed!", "Close", { duration: 3000 });
   }
 
-  private calculateStatsFromMatches(player: Player, matches: any[]): PlayerStats {
+  private calculateStatsFromMatches(player: Player, matches: MatchResponse[]): PlayerStats {
     console.log("Calculating stats from matches:", matches);
 
     if (!matches || matches.length === 0) {
@@ -132,11 +148,11 @@ export class MatchInputComponent implements OnInit {
       try {
         // Find the participant data for this player in the included data
         const participantData = matchResponse.included?.find(
-          (inc: any) => inc.type === "participant" && inc.attributes?.stats?.playerId === playerId,
+          (inc) => inc.type === "participant" && (inc.attributes as ParticipantAttributes)?.stats?.playerId === playerId,
         );
 
-        if (participantData?.attributes?.stats) {
-          const stats = participantData.attributes.stats;
+        if (participantData?.attributes && 'stats' in participantData.attributes) {
+          const stats = (participantData.attributes as ParticipantAttributes).stats;
           totalKills += stats.kills || 0;
           totalDeaths += stats.deathType !== "alive" ? 1 : 0;
           totalWins += stats.winPlace === 1 ? 1 : 0;
@@ -241,7 +257,7 @@ export class MatchInputComponent implements OnInit {
     }
   }
 
-  private generatePerformanceData(stats: PlayerStats): any[] {
+  private generatePerformanceData(stats: PlayerStats): PerformanceMetric[] {
     return [
       { metric: "Total Kills", value: stats.kills },
       { metric: "Wins", value: stats.wins },
@@ -250,19 +266,19 @@ export class MatchInputComponent implements OnInit {
     ];
   }
 
-  private generateTimelineData(matches: any[], playerId: string): any[] {
-    const timelineEvents: any[] = [];
+  private generateTimelineData(matches: MatchResponse[], playerId: string): TimelineEvent[] {
+    const timelineEvents: TimelineEvent[] = [];
 
     matches.slice(0, 10).forEach((matchResponse, index) => {
       try {
         const participantData = matchResponse.included?.find(
-          (inc: any) => inc.type === "participant" && inc.attributes?.stats?.playerId === playerId,
+          (inc) => inc.type === "participant" && (inc.attributes as ParticipantAttributes)?.stats?.playerId === playerId,
         );
 
-        if (participantData?.attributes?.stats) {
-          const stats = participantData.attributes.stats;
+        if (participantData?.attributes && 'stats' in participantData.attributes) {
+          const stats = (participantData.attributes as ParticipantAttributes).stats;
           const matchData = matchResponse.data?.attributes;
-          const createdAtIso = matchData?.createdAt || matchData?.createdAtISO || null;
+          const createdAtIso = matchData?.createdAt || null;
           const createdDate = createdAtIso ? new Date(createdAtIso) : null;
 
           timelineEvents.push({

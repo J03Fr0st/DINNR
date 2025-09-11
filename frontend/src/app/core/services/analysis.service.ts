@@ -1,11 +1,11 @@
 import { Injectable } from "@angular/core";
-import { Observable, of, throwError, forkJoin } from "rxjs";
-import { map, catchError, switchMap } from "rxjs/operators";
+import { type Observable, forkJoin, of, throwError } from "rxjs";
+import { catchError, map, switchMap } from "rxjs/operators";
+import type { Shard as ApiShard, Match, MatchResponse, ParticipantAttributes, Player } from "../models";
+import { type MatchAnalysis, PlayerAnalysis, PlayerInsights, PlayerMatchStats } from "../models/analysis.models";
+import { type MatchAnalysisForm, type PlayerSearchForm, Shard as UiShard } from "../models/ui.models";
 import { PubgApiService } from "./pubg-api.service";
 import { TelemetryService } from "./telemetry.service";
-import { MatchAnalysis, PlayerAnalysis, PlayerMatchStats, PlayerInsights } from "../models/analysis.models";
-import { MatchAnalysisForm, PlayerSearchForm, Shard as UiShard } from "../models/ui.models";
-import { Shard as ApiShard, Player, Match } from "../models";
 
 export interface PlayerStats {
   playerName: string;
@@ -109,16 +109,16 @@ export class AnalysisService {
     return this.getPlayerStats(form.playerName);
   }
 
-  private calculatePlayerStats(player: Player, matches: Match[]): PlayerStats {
-    const recentMatches = matches.slice(0, 10).map((match) => ({
-      matchId: match.id,
-      mapName: match.attributes.mapName,
-      gameMode: match.attributes.gameMode,
-      kills: this.getKillsFromMatch(match, player.id),
-      placement: this.getPlacementFromMatch(match, player.id),
-      damageDealt: this.getDamageFromMatch(match, player.id),
-      survivalTime: this.getSurvivalTimeFromMatch(match, player.id),
-      date: match.attributes.createdAt,
+  private calculatePlayerStats(player: Player, matches: MatchResponse[]): PlayerStats {
+    const recentMatches = matches.slice(0, 10).map((matchResponse) => ({
+      matchId: matchResponse.data.id,
+      mapName: matchResponse.data.attributes.mapName,
+      gameMode: matchResponse.data.attributes.gameMode,
+      kills: this.getKillsFromMatchResponse(matchResponse, player.id),
+      placement: this.getPlacementFromMatchResponse(matchResponse, player.id),
+      damageDealt: this.getDamageFromMatchResponse(matchResponse, player.id),
+      survivalTime: this.getSurvivalTimeFromMatchResponse(matchResponse, player.id),
+      date: matchResponse.data.attributes.createdAt,
     }));
 
     const totalMatches = matches.length;
@@ -145,27 +145,43 @@ export class AnalysisService {
     };
   }
 
-  private getPlacementFromMatch(match: Match, playerId: string): number {
-    // Since we're using HTTP API directly, we'll need to parse the match data differently
-    // For now, return a default value until we have the correct Match structure
+  private getPlacementFromMatchResponse(matchResponse: MatchResponse, playerId: string): number {
+    const participantData = matchResponse.included?.find(
+      (inc) => inc.type === "participant" && (inc.attributes as ParticipantAttributes)?.stats?.playerId === playerId,
+    );
+    if (participantData?.attributes && 'stats' in participantData.attributes) {
+      return (participantData.attributes as ParticipantAttributes).stats.winPlace || 0;
+    }
     return 0;
   }
 
-  private getKillsFromMatch(match: Match, playerId: string): number {
-    // Since we're using HTTP API directly, we'll need to parse the match data differently
-    // For now, return a default value until we have the correct Match structure
+  private getKillsFromMatchResponse(matchResponse: MatchResponse, playerId: string): number {
+    const participantData = matchResponse.included?.find(
+      (inc) => inc.type === "participant" && (inc.attributes as ParticipantAttributes)?.stats?.playerId === playerId,
+    );
+    if (participantData?.attributes && 'stats' in participantData.attributes) {
+      return (participantData.attributes as ParticipantAttributes).stats.kills || 0;
+    }
     return 0;
   }
 
-  private getDamageFromMatch(match: Match, playerId: string): number {
-    // Since we're using HTTP API directly, we'll need to parse the match data differently
-    // For now, return a default value until we have the correct Match structure
+  private getDamageFromMatchResponse(matchResponse: MatchResponse, playerId: string): number {
+    const participantData = matchResponse.included?.find(
+      (inc) => inc.type === "participant" && (inc.attributes as ParticipantAttributes)?.stats?.playerId === playerId,
+    );
+    if (participantData?.attributes && 'stats' in participantData.attributes) {
+      return (participantData.attributes as ParticipantAttributes).stats.damageDealt || 0;
+    }
     return 0;
   }
 
-  private getSurvivalTimeFromMatch(match: Match, playerId: string): number {
-    // Since we're using HTTP API directly, we'll need to parse the match data differently
-    // For now, return a default value until we have the correct Match structure
+  private getSurvivalTimeFromMatchResponse(matchResponse: MatchResponse, playerId: string): number {
+    const participantData = matchResponse.included?.find(
+      (inc) => inc.type === "participant" && (inc.attributes as ParticipantAttributes)?.stats?.playerId === playerId,
+    );
+    if (participantData?.attributes && 'stats' in participantData.attributes) {
+      return (participantData.attributes as ParticipantAttributes).stats.timeSurvived || 0;
+    }
     return 0;
   }
 
@@ -186,7 +202,7 @@ export class AnalysisService {
     this.pubgApiService.clearCache();
   }
 
-  getCacheStats(): any {
+  getCacheStats(): { size: number; keys: string[] } {
     return this.pubgApiService.getCacheStats();
   }
 }

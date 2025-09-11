@@ -1,9 +1,9 @@
-import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from "@angular/core";
-import { BrowserModule } from "@angular/platform-browser";
 import { CommonModule } from "@angular/common";
 import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
-import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
+import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from "@angular/core";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
+import { BrowserModule } from "@angular/platform-browser";
+import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { MaterialModule } from "./material.module";
 
 import { AppRoutingModule } from "./app-routing.module";
@@ -18,7 +18,6 @@ import { PubgApiService } from "./core/services/pubg-api.service";
   imports: [
     BrowserModule,
     CommonModule,
-    BrowserAnimationsModule,
     FormsModule,
     ReactiveFormsModule,
     MaterialModule,

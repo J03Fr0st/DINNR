@@ -1,6 +1,6 @@
-import { Component, OnInit } from "@angular/core";
-import { ActivatedRoute } from "@angular/router";
+import { Component, type OnInit } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
+import { ActivatedRoute } from "@angular/router";
 
 @Component({
   selector: "app-match-analysis",
@@ -218,13 +218,13 @@ export class MatchAnalysisComponent implements OnInit {
 
     // Check for query parameters
     this.route.queryParams.subscribe((params) => {
-      if (params["matchId"]) {
+      if (params['matchId']) {
         this.matchForm.patchValue({
-          matchId: params["matchId"],
+          matchId: params['matchId'],
         });
       }
-      if (params["players"]) {
-        const players = Array.isArray(params["players"]) ? params["players"].join(", ") : params["players"];
+      if (params['players']) {
+        const players = Array.isArray(params['players']) ? params['players'].join(", ") : params['players'];
         this.matchForm.patchValue({
           playerNames: players,
         });

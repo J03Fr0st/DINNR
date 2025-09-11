@@ -1,5 +1,16 @@
 import { Component, Input } from "@angular/core";
 
+interface TimelineData {
+  matchNumber: number;
+  matchId?: string;
+  playerName?: string;
+  kills: number;
+  rank: string | number;
+  mode: string;
+  date: string;
+  time: string;
+}
+
 @Component({
   selector: "app-kill-timeline",
   template: `
@@ -45,5 +56,5 @@ import { Component, Input } from "@angular/core";
   standalone: false,
 })
 export class KillTimelineComponent {
-  @Input() timelineData: any[] = [];
+  @Input() timelineData: TimelineData[] = [];
 }

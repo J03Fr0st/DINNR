@@ -1,19 +1,19 @@
-import { NgModule } from "@angular/core";
 import { CommonModule } from "@angular/common";
-import { RouterModule } from "@angular/router";
+import { NgModule } from "@angular/core";
 import { ReactiveFormsModule } from "@angular/forms";
+import { MatButtonModule } from "@angular/material/button";
 import { MatCardModule } from "@angular/material/card";
 import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatIconModule } from "@angular/material/icon";
 import { MatInputModule } from "@angular/material/input";
-import { MatButtonModule } from "@angular/material/button";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 import { MatSnackBarModule } from "@angular/material/snack-bar";
-import { MatIconModule } from "@angular/material/icon";
+import { RouterModule } from "@angular/router";
 
-import { MatchAnalysisComponent } from "./match-analysis.component";
-import { MatchInputComponent } from "./components/match-input/match-input.component";
 import { KillTimelineComponent } from "./components/kill-timeline/kill-timeline.component";
+import { MatchInputComponent } from "./components/match-input/match-input.component";
 import { PerformanceChartComponent } from "./components/performance-chart/performance-chart.component";
+import { MatchAnalysisComponent } from "./match-analysis.component";
 
 @NgModule({
   declarations: [MatchAnalysisComponent, MatchInputComponent, KillTimelineComponent, PerformanceChartComponent],

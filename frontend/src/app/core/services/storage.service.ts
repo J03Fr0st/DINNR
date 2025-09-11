@@ -61,7 +61,7 @@ export class StorageService {
 
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key && key.startsWith(this.PREFIX)) {
+      if (key?.startsWith(this.PREFIX)) {
         keysToRemove.push(key);
       }
     }
@@ -80,7 +80,7 @@ export class StorageService {
 
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key && key.startsWith(this.PREFIX)) {
+      if (key?.startsWith(this.PREFIX)) {
         try {
           const item = localStorage.getItem(key);
           if (item) {
@@ -111,7 +111,7 @@ export class StorageService {
 
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key && key.startsWith(this.PREFIX)) {
+      if (key?.startsWith(this.PREFIX)) {
         total++;
         size += key.length + (localStorage.getItem(key)?.length || 0);
 
@@ -136,7 +136,7 @@ export class StorageService {
     };
   }
 
-  private isExpired(item: any): boolean {
+  private isExpired(item: { timestamp: number; ttl: number | null }): boolean {
     if (!item.ttl) return false;
     return Date.now() - item.timestamp > item.ttl;
   }
@@ -148,7 +148,7 @@ export class StorageService {
     const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+    return `${Number.parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
   }
 
   isAvailable(): boolean {

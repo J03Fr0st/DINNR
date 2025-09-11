@@ -122,5 +122,5 @@ export function calculateDistance(
   pos1: { x: number; y: number; z: number },
   pos2: { x: number; y: number; z: number },
 ): number {
-  return Math.sqrt(Math.pow(pos2.x - pos1.x, 2) + Math.pow(pos2.y - pos1.y, 2) + Math.pow(pos2.z - pos1.z, 2));
+  return Math.sqrt((pos2.x - pos1.x) ** 2 + (pos2.y - pos1.y) ** 2 + (pos2.z - pos1.z) ** 2);
 }

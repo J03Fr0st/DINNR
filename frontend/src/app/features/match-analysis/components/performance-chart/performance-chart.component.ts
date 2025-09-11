@@ -1,5 +1,10 @@
 import { Component, Input } from "@angular/core";
 
+interface PerformanceData {
+  metric: string;
+  value: string | number;
+}
+
 @Component({
   selector: "app-performance-chart",
   template: `
@@ -41,5 +46,5 @@ import { Component, Input } from "@angular/core";
   standalone: false,
 })
 export class PerformanceChartComponent {
-  @Input() performanceData: any[] = [];
+  @Input() performanceData: PerformanceData[] = [];
 }

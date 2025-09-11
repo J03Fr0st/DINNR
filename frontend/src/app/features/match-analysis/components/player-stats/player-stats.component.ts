@@ -1,5 +1,5 @@
 import { Component, Input } from "@angular/core";
-import { PlayerAnalysis, WeaponStats } from "../../../../core/models/index";
+import type { PlayerAnalysis, WeaponStats } from "../../../../core/models/index";
 
 @Component({
   selector: "app-player-stats",

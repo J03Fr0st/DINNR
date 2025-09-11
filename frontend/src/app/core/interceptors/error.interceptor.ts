@@ -1,6 +1,6 @@
+import type { HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor, HttpErrorResponse } from "@angular/common/http";
-import { Observable, throwError } from "rxjs";
+import { type Observable, throwError } from "rxjs";
 import { catchError, retry } from "rxjs/operators";
 
 @Injectable()
