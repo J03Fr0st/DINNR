@@ -1,7 +1,7 @@
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
-import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MaterialModule } from './material.module';
@@ -18,36 +18,30 @@ import { KillTimelineComponent } from './features/match-analysis/components/kill
 import { TeamComparisonComponent } from './features/match-analysis/components/team-comparison/team-comparison.component';
 import { PubgApiService } from './core/services/pubg-api.service';
 
-@NgModule({
-  declarations: [
-    AppComponent,
-    MatchInputComponent,
-    PlayerStatsComponent,
-    MatchSummaryComponent,
-    InsightsComponent,
-    PerformanceChartComponent,
-    KillTimelineComponent,
-    TeamComparisonComponent
-  ],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  imports: [
-    BrowserModule,
-    CommonModule,
-    HttpClientModule,
-    BrowserAnimationsModule,
-    FormsModule,
-    ReactiveFormsModule,
-    MaterialModule,
-    AppRoutingModule
-  ],
-  providers: [
-    PubgApiService,
-    {
-      provide: HTTP_INTERCEPTORS,
-      useClass: ErrorInterceptor,
-      multi: true
-    }
-  ],
-  bootstrap: [AppComponent]
-})
+@NgModule({ declarations: [
+        AppComponent,
+        MatchInputComponent,
+        PlayerStatsComponent,
+        MatchSummaryComponent,
+        InsightsComponent,
+        PerformanceChartComponent,
+        KillTimelineComponent,
+        TeamComparisonComponent
+    ],
+    schemas: [CUSTOM_ELEMENTS_SCHEMA],
+    bootstrap: [AppComponent], imports: [BrowserModule,
+        CommonModule,
+        BrowserAnimationsModule,
+        FormsModule,
+        ReactiveFormsModule,
+        MaterialModule,
+        AppRoutingModule], providers: [
+        PubgApiService,
+        {
+            provide: HTTP_INTERCEPTORS,
+            useClass: ErrorInterceptor,
+            multi: true
+        },
+        provideHttpClient(withInterceptorsFromDi())
+    ] })
 export class AppModule { }
