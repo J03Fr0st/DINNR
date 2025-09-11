@@ -2,17 +2,17 @@
 @use '@angular/material' as mat;
 
 /* Define custom theme colors */
-$pubg-primary: mat.define-palette(mat.$gray-palette, 900, 800, 900);
-$pubg-accent: mat.define-palette(mat.$red-palette, 700, 600, 800);
-$pubg-warn: mat.define-palette(mat.$orange-palette, 800);
+$pubg-primary: mat.m2-define-palette(mat.$m2-gray-palette, 900, 800, 900);
+$pubg-accent: mat.m2-define-palette(mat.$m2-red-palette, 700, 600, 800);
+$pubg-warn: mat.m2-define-palette(mat.$m2-orange-palette, 800);
 
-$pubg-theme: mat.define-light-theme((
+$pubg-theme: mat.m2-define-light-theme((
   color: (
     primary: $pubg-primary,
     accent: $pubg-accent,
     warn: $pubg-warn,
   ),
-  typography: mat.define-typography-config(),
+  typography: mat.m2-define-typography-config(),
   density: 0,
 ));
 
