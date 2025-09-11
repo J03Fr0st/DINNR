@@ -5,7 +5,7 @@
         <i class="fas fa-search"></i>
         Quick Player Analysis
       </h3>
-      <p class="form-description">Enter a player name and select their region to get comprehensive performance insights</p>
+      <p class="form-description">Enter a player name to get comprehensive performance insights from Steam platform</p>
     </div>
 
     <form [formGroup]="playerForm" (ngSubmit)="onSubmit()">
@@ -21,19 +21,6 @@
             Player name must be at least 2 characters
           </mat-error>
           <mat-hint>Enter the exact in-game player name</mat-hint>
-        </mat-form-field>
-      </div>
-
-      <div class="form-field">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Region/Shard</mat-label>
-          <i class="fas fa-globe mat-prefix" matPrefix></i>
-          <mat-select formControlName="shard">
-            <mat-option *ngFor="let region of availableRegions" [value]="region.value">
-              {{ region.label }}
-            </mat-option>
-          </mat-select>
-          <mat-hint>Select the player's gaming region</mat-hint>
         </mat-form-field>
       </div>
 

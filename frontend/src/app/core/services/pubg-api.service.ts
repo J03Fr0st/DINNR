@@ -3,7 +3,7 @@ import { Observable, of, throwError, forkJoin } from 'rxjs';
 import { map, catchError, switchMap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { PubgClient } from '@j03fr0st/pubg-ts';
-import { Player, Match, TelemetryEvent, Shard as ApiShard } from '../models';
+import { Player, Match, TelemetryEvent, Shard as ApiShard, MatchResponse } from '../models';
 
 @Injectable({
   providedIn: 'root'
@@ -107,9 +107,9 @@ export class PubgApiService {
     });
   }
 
-  getPlayerMatches(playerId: string): Observable<Match[]> {
+  getPlayerMatches(playerId: string): Observable<any[]> {
     const cacheKey = this.getCacheKey(`player-matches-${playerId}`);
-    const cached = this.getFromCache<Match[]>(cacheKey);
+    const cached = this.getFromCache<any[]>(cacheKey);
     if (cached) {
       return of(cached);
     }
@@ -134,7 +134,7 @@ export class PubgApiService {
           const recentMatchIds = matchIds.slice(0, 10);
           const matchPromises = recentMatchIds.map((matchId: string) =>
             this.pubgClient.matches.getMatch(matchId)
-              .then(matchResponse => matchResponse.data)
+              .then(matchResponse => matchResponse) // Return full response, not just data
               .catch(error => {
                 console.warn(`Failed to fetch match ${matchId}:`, error);
                 return null; // Return null for failed matches
@@ -142,8 +142,8 @@ export class PubgApiService {
           );
 
           Promise.all(matchPromises)
-            .then((matches: (Match | null)[]) => {
-              const validMatches = matches.filter((match: Match | null) => match !== null) as Match[];
+            .then((matches: (any | null)[]) => {
+              const validMatches = matches.filter((match: any | null) => match !== null) as any[];
               this.setCache(cacheKey, validMatches);
               observer.next(validMatches);
               observer.complete();

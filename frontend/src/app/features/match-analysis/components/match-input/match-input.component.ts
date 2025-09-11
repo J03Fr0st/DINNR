@@ -1,22 +1,27 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { finalize } from 'rxjs/operators';
+import { finalize, switchMap, map } from 'rxjs/operators';
 import { PubgApiService } from '../../../../core/services';
+import { Player, Match, MatchResponse, Participant } from '../../../../core/models';
+
+interface PlayerStats {
+  kills: number;
+  wins: number;
+  kdRatio: number;
+  damagePerMatch: number;
+}
+
+interface PlayerInsight {
+  type: string;
+  description: string;
+}
 
 interface PlayerAnalysis {
   playerName: string;
   region: string;
-  stats: {
-    kills: number;
-    wins: number;
-    kdRatio: number;
-    damagePerMatch: number;
-  };
-  insights: Array<{
-    type: string;
-    description: string;
-  }>;
+  stats: PlayerStats;
+  insights: PlayerInsight[];
 }
 
 @Component({
@@ -29,21 +34,6 @@ export class MatchInputComponent implements OnInit {
   playerForm!: FormGroup;
   loading = false;
   analysis: PlayerAnalysis | null = null;
-  
-  // Available regions for display purposes
-  availableRegions = [
-    { value: 'steam', label: 'Steam' },
-    { value: 'pc-na', label: 'North America' },
-    { value: 'pc-eu', label: 'Europe' },
-    { value: 'pc-as', label: 'Asia' },
-    { value: 'pc-kakao', label: 'Kakao' },
-    { value: 'pc-sea', label: 'South East Asia' },
-    { value: 'pc-krjp', label: 'Korea/Japan' },
-    { value: 'pc-jp', label: 'Japan' },
-    { value: 'pc-oc', label: 'Oceania' },
-    { value: 'pc-sa', label: 'South America' },
-    { value: 'pc-ru', label: 'Russia' }
-  ];
 
   constructor(
     private fb: FormBuilder,
@@ -53,31 +43,40 @@ export class MatchInputComponent implements OnInit {
 
   ngOnInit(): void {
     this.playerForm = this.fb.group({
-      playerName: ['', [Validators.required, Validators.minLength(2)]],
-      shard: ['steam', Validators.required]
+      playerName: ['', [Validators.required, Validators.minLength(2)]]
     });
   }
 
   onSubmit(): void {
     if (this.playerForm.invalid) {
-      this.snackBar.open('Please enter a valid player name and select a shard', 'Close', { duration: 3000 });
+      this.snackBar.open('Please enter a valid player name', 'Close', { duration: 3000 });
       return;
     }
 
     this.loading = true;
     const formData = this.playerForm.value;
 
+    console.log('Searching for player:', formData.playerName);
+
     // Use real PUBG API (shard is handled at client level)
     this.pubgApiService.getPlayerByName(formData.playerName)
       .pipe(
+        switchMap(player => {
+          console.log('Player response received:', player);
+          // Fetch recent matches to calculate stats
+          return this.pubgApiService.getPlayerMatches(player.id).pipe(
+            map(matches => ({ player, matches }))
+          );
+        }),
         finalize(() => {
           this.loading = false;
         })
       )
       .subscribe({
-        next: (player) => {
+        next: ({ player, matches }: { player: Player; matches: any[] }) => {
+          console.log('Player and matches received:', { player, matches });
           // Get player stats and create analysis
-          this.processPlayerData(player);
+          this.processPlayerData(player, matches);
         },
         error: (error) => {
           console.error('API Error:', error);
@@ -86,33 +85,85 @@ export class MatchInputComponent implements OnInit {
       });
   }
 
-  private processPlayerData(player: any): void {
-    // Extract stats from player data
-    const stats = this.extractPlayerStats(player);
+  private processPlayerData(player: Player, matches: any[]): void {
+    console.log('Processing player data...');
+    
+    // Calculate stats from recent matches
+    const stats = this.calculateStatsFromMatches(player, matches);
     const insights = this.generateInsights(stats);
 
     this.analysis = {
-      playerName: player.attributes.name,
+      playerName: player.attributes.name || 'Unknown',
       region: 'Steam', // Default since all queries use the steam shard
       stats: stats,
       insights: insights
     };
 
+    console.log('Final analysis object:', this.analysis);
     this.snackBar.open('Player analysis completed!', 'Close', { duration: 3000 });
   }
 
-  private extractPlayerStats(player: any): any {
-    const stats = player.attributes.stats || {};
+  private calculateStatsFromMatches(player: Player, matches: any[]): PlayerStats {
+    console.log('Calculating stats from matches:', matches);
+    
+    if (!matches || matches.length === 0) {
+      return {
+        kills: 0,
+        wins: 0,
+        kdRatio: 0,
+        damagePerMatch: 0
+      };
+    }
+
+    let totalKills = 0;
+    let totalDeaths = 0;
+    let totalWins = 0;
+    let totalDamage = 0;
+    let validMatches = 0;
+
+    const playerId = player.id;
+    
+    matches.forEach(matchResponse => {
+      try {
+        // Find the participant data for this player in the included data
+        const participantData = matchResponse.included?.find((inc: any) => 
+          inc.type === 'participant' && 
+          inc.attributes?.stats?.playerId === playerId
+        );
+
+        if (participantData?.attributes?.stats) {
+          const stats = participantData.attributes.stats;
+          totalKills += stats.kills || 0;
+          totalDeaths += stats.deathType !== 'alive' ? 1 : 0;
+          totalWins += stats.winPlace === 1 ? 1 : 0;
+          totalDamage += stats.damageDealt || 0;
+          validMatches++;
+        }
+      } catch (error) {
+        console.warn('Error processing match:', error);
+      }
+    });
+
+    const kdRatio = totalDeaths > 0 ? totalKills / totalDeaths : totalKills;
+    const damagePerMatch = validMatches > 0 ? totalDamage / validMatches : 0;
+
+    console.log('Calculated stats:', {
+      kills: totalKills,
+      wins: totalWins,
+      kdRatio,
+      damagePerMatch,
+      matchesProcessed: validMatches
+    });
 
     return {
-      kills: stats.kills || 0,
-      wins: stats.wins || 0,
-      kdRatio: stats.kdRatio || 0,
-      damagePerMatch: stats.damagePerMatch || 0
+      kills: totalKills,
+      wins: totalWins,
+      kdRatio: Number(kdRatio.toFixed(2)),
+      damagePerMatch: Number(damagePerMatch.toFixed(0))
     };
   }
 
-  private generateInsights(stats: any): any[] {
+  private generateInsights(stats: PlayerStats): PlayerInsight[] {
     const insights = [];
 
     if (stats.kills > 1000) {
@@ -187,7 +238,9 @@ export class MatchInputComponent implements OnInit {
   }
 
   resetForm(): void {
-    this.playerForm.reset();
+    this.playerForm.reset({
+      playerName: ''
+    });
     this.analysis = null;
   }
 }
