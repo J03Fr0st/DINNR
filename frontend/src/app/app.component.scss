@@ -26,6 +26,12 @@
 .logo {
   display: flex;
   flex-direction: column;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    opacity: 0.8;
+  }
   
   h1 {
     font-size: 2rem;
@@ -58,6 +64,11 @@
     
     &:hover {
       background: rgba(244, 67, 54, 0.1);
+      color: #f44336;
+    }
+    
+    &.active {
+      background: rgba(244, 67, 54, 0.2);
       color: #f44336;
     }
   }

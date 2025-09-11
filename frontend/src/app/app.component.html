@@ -1,49 +1,20 @@
 <div class="app-container">
   <header class="app-header">
     <div class="header-content">
-      <div class="logo">
+      <div class="logo" routerLink="/home">
         <h1>DINNR</h1>
         <p class="tagline">PUBG Analytics Platform</p>
       </div>
       <nav class="nav-menu">
-        <a href="#" class="nav-link">Match Analysis</a>
-        <a href="#" class="nav-link">Player Stats</a>
-        <a href="#" class="nav-link">About</a>
+        <a routerLink="/home" class="nav-link" routerLinkActive="active">Home</a>
+        <a routerLink="/player-stats" class="nav-link" routerLinkActive="active">Player Stats</a>
+        <a routerLink="/match-analysis" class="nav-link" routerLinkActive="active">Match Analysis</a>
       </nav>
     </div>
   </header>
 
   <main class="main-content">
-    <div class="hero-section">
-      <div class="hero-content">
-        <h2>Analyze Your PUBG Performance</h2>
-        <p>Transform raw telemetry data into actionable insights for faster improvement and smarter squad calls.</p>
-        <div class="hero-actions">
-          <button mat-raised-button color="primary" routerLink="/match-analysis">
-            <mat-icon>analytics</mat-icon>
-            Analyze Match
-          </button>
-          <button mat-raised-button color="accent">
-            <mat-icon>person_search</mat-icon>
-            Find Player
-          </button>
-        </div>
-      </div>
-    </div>
-
-
-
-    <div class="quick-start">
-      <mat-card>
-        <mat-card-header>
-          <mat-card-title>Quick Start</mat-card-title>
-          <mat-card-subtitle>Enter a match ID and player names to begin analysis</mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content>
-          <app-match-input></app-match-input>
-        </mat-card-content>
-      </mat-card>
-    </div>
+    <router-outlet></router-outlet>
   </main>
 
   <footer class="app-footer">
@@ -86,5 +57,3 @@
     </div>
   </footer>
 </div>
-
-<router-outlet />
