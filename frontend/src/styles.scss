@@ -17,7 +17,8 @@ $pubg-theme: mat.m2-define-light-theme((
 ));
 
 /* Include theme styles */
-@include mat.core-theme($pubg-theme);
+@include mat.elevation-classes();
+@include mat.app-background();
 @include mat.button-theme($pubg-theme);
 @include mat.card-theme($pubg-theme);
 @include mat.form-field-theme($pubg-theme);
