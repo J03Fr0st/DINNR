@@ -1,6 +1,6 @@
-import { Component, type OnInit } from "@angular/core";
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from "@angular/forms";
-import { CommonModule } from "@angular/common";
+import { Component, type OnInit, signal, computed, inject, effect } from "@angular/core";
+import { FormBuilder, type FormGroup, Validators, ReactiveFormsModule } from "@angular/forms";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { MatCardModule } from "@angular/material/card";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatInputModule } from "@angular/material/input";
@@ -29,24 +29,28 @@ import { MatIconModule } from "@angular/material/icon";
           <mat-card-subtitle>Enter a player name to get comprehensive performance insights</mat-card-subtitle>
         </mat-card-header>
         <mat-card-content>
-          <form [formGroup]="playerForm" class="player-form">
+          <form [formGroup]="playerForm()" class="player-form" (ngSubmit)="onSubmit()">
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>Player Name</mat-label>
               <input matInput formControlName="playerName" placeholder="Enter PUBG player name">
               <mat-icon matSuffix>person</mat-icon>
-              <mat-error *ngIf="playerForm.get('playerName')?.hasError('required')">
-                Player name is required
-              </mat-error>
-              <mat-error *ngIf="playerForm.get('playerName')?.hasError('minlength')">
-                Player name must be at least 2 characters
-              </mat-error>
+              @if (validationMessages().required) {
+                <mat-error>{{ validationMessages().required }}</mat-error>
+              }
+              @if (validationMessages().minlength) {
+                <mat-error>{{ validationMessages().minlength }}</mat-error>
+              }
               <mat-hint>Enter the exact in-game player name</mat-hint>
             </mat-form-field>
 
             <div class="form-actions">
-              <button mat-raised-button color="primary" type="submit" [disabled]="playerForm.invalid">
-                <mat-icon>analytics</mat-icon>
-                Analyze Player
+              <button mat-raised-button color="primary" type="submit" [disabled]="!isFormValid() || isLoading()">
+                @if (isLoading()) {
+                  <mat-spinner diameter="20"></mat-spinner>
+                } @else {
+                  <mat-icon>analytics</mat-icon>
+                }
+                {{ isLoading() ? 'Analyzing...' : 'Analyze Player' }}
               </button>
               <button mat-raised-button type="button" (click)="clearForm()">
                 <mat-icon>refresh</mat-icon>
@@ -64,11 +68,9 @@ import { MatIconModule } from "@angular/material/icon";
             <div>
               <h3>Player Statistics Features</h3>
               <ul>
-                <li>Historical performance tracking</li>
-                <li>Match-by-match analysis</li>
-                <li>Performance trends and insights</li>
-                <li>Weapon usage statistics</li>
-                <li>Improvement recommendations</li>
+                @for (feature of features(); track feature) {
+                  <li>{{ feature }}</li>
+                }
               </ul>
             </div>
           </div>
@@ -194,7 +196,6 @@ import { MatIconModule } from "@angular/material/icon";
   ],
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatCardModule,
     MatFormFieldModule,
@@ -206,17 +207,82 @@ import { MatIconModule } from "@angular/material/icon";
   ],
 })
 export class PlayerStatsComponent implements OnInit {
-  playerForm!: FormGroup;
+  // Inject dependencies using modern inject() function
+  private fb = inject(FormBuilder);
 
-  constructor(private fb: FormBuilder) {}
+  // Signals for reactive state management
+  playerForm = signal<FormGroup>(this.createForm());
+  isLoading = signal(false);
+  errorMessage = signal<string | null>(null);
+  playerData = signal<any>(null);
+
+  // Form field signals
+  playerName = signal("");
+
+  // Computed signals
+  isFormValid = computed(() => this.playerForm().valid);
+  hasResults = computed(() => this.playerData() !== null);
+
+  // Features list as signal
+  features = signal([
+    "Historical performance tracking",
+    "Match-by-match analysis",
+    "Performance trends and insights",
+    "Weapon usage statistics",
+    "Improvement recommendations",
+  ]);
+
+  // Form validation messages
+  validationMessages = computed(() => ({
+    required: this.playerForm().get("playerName")?.hasError("required") ? "Player name is required" : null,
+    minlength: this.playerForm().get("playerName")?.hasError("minlength")
+      ? "Player name must be at least 2 characters"
+      : null,
+  }));
+
+  constructor() {
+    // Effect to watch for form changes
+    effect(() => {
+      const form = this.playerForm();
+      if (form) {
+        this.playerName.set(form.get("playerName")?.value || "");
+      }
+    });
+  }
 
   ngOnInit(): void {
-    this.playerForm = this.fb.group({
+    // Form is already created in the signal initialization
+  }
+
+  private createForm(): FormGroup {
+    return this.fb.group({
       playerName: ["", [Validators.required, Validators.minLength(2)]],
     });
   }
 
   clearForm(): void {
-    this.playerForm.reset();
+    this.playerForm().reset();
+    this.playerData.set(null);
+    this.errorMessage.set(null);
+  }
+
+  onSubmit(): void {
+    if (this.isFormValid()) {
+      this.isLoading.set(true);
+      this.errorMessage.set(null);
+      // TODO: Implement actual player analysis logic
+      console.log("Analyzing player:", this.playerName());
+
+      // Simulate API call
+      setTimeout(() => {
+        this.isLoading.set(false);
+        this.playerData.set({
+          name: this.playerName(),
+          matches: 150,
+          wins: 25,
+          avgDamage: 350,
+        });
+      }, 2000);
+    }
   }
 }

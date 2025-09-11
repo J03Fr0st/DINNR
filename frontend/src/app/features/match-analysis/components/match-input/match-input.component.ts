@@ -166,10 +166,11 @@ export class MatchInputComponent implements OnInit {
       try {
         // Find the participant data for this player in the included data
         const participantData = matchResponse.included?.find(
-          (inc) => inc.type === "participant" && (inc.attributes as ParticipantAttributes)?.stats?.playerId === playerId,
+          (inc) =>
+            inc.type === "participant" && (inc.attributes as ParticipantAttributes)?.stats?.playerId === playerId,
         );
 
-        if (participantData?.attributes && 'stats' in participantData.attributes) {
+        if (participantData?.attributes && "stats" in participantData.attributes) {
           const stats = (participantData.attributes as ParticipantAttributes).stats;
           totalKills += stats.kills || 0;
           totalDeaths += stats.deathType !== "alive" ? 1 : 0;
@@ -290,10 +291,11 @@ export class MatchInputComponent implements OnInit {
     matches.slice(0, 10).forEach((matchResponse, index) => {
       try {
         const participantData = matchResponse.included?.find(
-          (inc) => inc.type === "participant" && (inc.attributes as ParticipantAttributes)?.stats?.playerId === playerId,
+          (inc) =>
+            inc.type === "participant" && (inc.attributes as ParticipantAttributes)?.stats?.playerId === playerId,
         );
 
-        if (participantData?.attributes && 'stats' in participantData.attributes) {
+        if (participantData?.attributes && "stats" in participantData.attributes) {
           const stats = (participantData.attributes as ParticipantAttributes).stats;
           const matchData = matchResponse.data?.attributes;
           const createdAtIso = matchData?.createdAt || null;

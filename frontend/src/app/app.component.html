@@ -6,9 +6,11 @@
         <p class="tagline">PUBG Analytics Platform</p>
       </div>
       <nav class="nav-menu">
-        <a routerLink="/home" class="nav-link" routerLinkActive="active">Home</a>
-        <a routerLink="/player-stats" class="nav-link" routerLinkActive="active">Player Stats</a>
-        <a routerLink="/match-analysis" class="nav-link" routerLinkActive="active">Match Analysis</a>
+        @for (item of navItems(); track item.path) {
+          <a [routerLink]="item.path" class="nav-link" routerLinkActive="active">
+            {{ item.label }}
+          </a>
+        }
       </nav>
     </div>
   </header>
@@ -26,34 +28,34 @@
       <div class="footer-section">
         <h4>Features</h4>
         <ul>
-          <li>Match Analysis</li>
-          <li>Player Statistics</li>
-          <li>Team Performance</li>
-          <li>Strategic Insights</li>
+          @for (feature of features(); track feature) {
+            <li>{{ feature }}</li>
+          }
         </ul>
       </div>
       <div class="footer-section">
         <h4>Resources</h4>
         <ul>
-          <li><a href="#">Documentation</a></li>
-          <li><a href="#">API Reference</a></li>
-          <li><a href="#">Support</a></li>
+          @for (resource of resources(); track resource.label) {
+            <li>
+              <a [href]="resource.href">{{ resource.label }}</a>
+            </li>
+          }
         </ul>
       </div>
       <div class="footer-section">
         <h4>Connect</h4>
         <div class="social-links">
-          <a href="#" aria-label="GitHub">
-            <mat-icon>code</mat-icon>
-          </a>
-          <a href="#" aria-label="Twitter">
-            <mat-icon>alternate_email</mat-icon>
-          </a>
+          @for (social of socialLinks(); track social.label) {
+            <a [href]="social.href" [aria-label]="social.label">
+              <mat-icon>{{ social.icon }}</mat-icon>
+            </a>
+          }
         </div>
       </div>
     </div>
     <div class="footer-bottom">
-      <p>&copy; 2025 DINNR. Powered by PUBG API.</p>
+      <p>{{ footerText() }}</p>
     </div>
   </footer>
 </div>

@@ -149,7 +149,7 @@ export class AnalysisService {
     const participantData = matchResponse.included?.find(
       (inc) => inc.type === "participant" && (inc.attributes as ParticipantAttributes)?.stats?.playerId === playerId,
     );
-    if (participantData?.attributes && 'stats' in participantData.attributes) {
+    if (participantData?.attributes && "stats" in participantData.attributes) {
       return (participantData.attributes as ParticipantAttributes).stats.winPlace || 0;
     }
     return 0;
@@ -159,7 +159,7 @@ export class AnalysisService {
     const participantData = matchResponse.included?.find(
       (inc) => inc.type === "participant" && (inc.attributes as ParticipantAttributes)?.stats?.playerId === playerId,
     );
-    if (participantData?.attributes && 'stats' in participantData.attributes) {
+    if (participantData?.attributes && "stats" in participantData.attributes) {
       return (participantData.attributes as ParticipantAttributes).stats.kills || 0;
     }
     return 0;
@@ -169,7 +169,7 @@ export class AnalysisService {
     const participantData = matchResponse.included?.find(
       (inc) => inc.type === "participant" && (inc.attributes as ParticipantAttributes)?.stats?.playerId === playerId,
     );
-    if (participantData?.attributes && 'stats' in participantData.attributes) {
+    if (participantData?.attributes && "stats" in participantData.attributes) {
       return (participantData.attributes as ParticipantAttributes).stats.damageDealt || 0;
     }
     return 0;
@@ -179,7 +179,7 @@ export class AnalysisService {
     const participantData = matchResponse.included?.find(
       (inc) => inc.type === "participant" && (inc.attributes as ParticipantAttributes)?.stats?.playerId === playerId,
     );
-    if (participantData?.attributes && 'stats' in participantData.attributes) {
+    if (participantData?.attributes && "stats" in participantData.attributes) {
       return (participantData.attributes as ParticipantAttributes).stats.timeSurvived || 0;
     }
     return 0;

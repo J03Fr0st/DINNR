@@ -57,15 +57,13 @@ export class TelemetryService {
     return this.pubgApiService.getMatch(matchId).pipe(
       switchMap((match) => {
         const telemetryUrl = this.extractTelemetryUrl(match);
-        return this.pubgApiService
-          .getTelemetry(telemetryUrl)
-          .pipe(
-            map((telemetry) => this.processTelemetry(telemetry, playerNames, match)),
-            catchError((error) => {
-              console.error("Error processing telemetry:", error);
-              return throwError(() => new Error(`Failed to analyze match: ${error.message}`));
-            }),
-          );
+        return this.pubgApiService.getTelemetry(telemetryUrl).pipe(
+          map((telemetry) => this.processTelemetry(telemetry, playerNames, match)),
+          catchError((error) => {
+            console.error("Error processing telemetry:", error);
+            return throwError(() => new Error(`Failed to analyze match: ${error.message}`));
+          }),
+        );
       }),
       catchError((error) => {
         console.error("Error fetching match:", error);
@@ -131,10 +129,7 @@ export class TelemetryService {
       (e) => e._T === "LogPlayerKill" && (e as LogPlayerKill).killer.name === playerName,
     ) as LogPlayerKill[];
 
-    const totalDamage = killEvents.reduce(
-      (sum, event) => sum + (this.extractDamageFromKillEvent(event) || 0),
-      0,
-    );
+    const totalDamage = killEvents.reduce((sum, event) => sum + (this.extractDamageFromKillEvent(event) || 0), 0);
     const totalDistance = this.calculateTotalDistance(events, playerName);
 
     return {

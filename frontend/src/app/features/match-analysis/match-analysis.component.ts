@@ -1,9 +1,9 @@
-import { Component, type OnInit } from "@angular/core";
+import { Component, OnInit, signal, computed, inject, effect } from "@angular/core";
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from "@angular/forms";
 import { ActivatedRoute } from "@angular/router";
 import { InsightsComponent } from "./components/insights/insights.component";
 import { MaterialModule } from "../../material.module";
-import { CommonModule } from "@angular/common";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 
 @Component({
   selector: "app-match-analysis",
@@ -25,15 +25,15 @@ import { CommonModule } from "@angular/common";
           <mat-card-subtitle>Enter match ID and player names for detailed analysis</mat-card-subtitle>
         </mat-card-header>
         <mat-card-content>
-          <form [formGroup]="matchForm" class="match-form">
+          <form [formGroup]="matchForm()" class="match-form" (ngSubmit)="onSubmit()">
             <div class="form-row">
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>Match ID</mat-label>
                 <input matInput formControlName="matchId" placeholder="Enter match ID (GUID)">
                 <i class="fas fa-hashtag mat-suffix" matSuffix></i>
-                <mat-error *ngIf="matchForm.get('matchId')?.hasError('required')">
-                  Match ID is required
-                </mat-error>
+                @if (validationMessages().matchId) {
+                  <mat-error>{{ validationMessages().matchId }}</mat-error>
+                }
                 <mat-hint>Enter the GUID of the match to analyze</mat-hint>
               </mat-form-field>
             </div>
@@ -43,17 +43,21 @@ import { CommonModule } from "@angular/common";
                 <mat-label>Player Names</mat-label>
                 <input matInput formControlName="playerNames" placeholder="Enter player names, separated by commas">
                 <i class="fas fa-users mat-suffix" matSuffix></i>
-                <mat-error *ngIf="matchForm.get('playerNames')?.hasError('required')">
-                  At least one player name is required
-                </mat-error>
+                @if (validationMessages().playerNames) {
+                  <mat-error>{{ validationMessages().playerNames }}</mat-error>
+                }
                 <mat-hint>Enter one or more player names to analyze from this match</mat-hint>
               </mat-form-field>
             </div>
 
             <div class="form-actions">
-              <button mat-raised-button color="primary" type="submit" [disabled]="matchForm.invalid">
-                <i class="fas fa-chart-line"></i>
-                Analyze Match
+              <button mat-raised-button color="primary" type="submit" [disabled]="!isFormValid() || isLoading()">
+                @if (isLoading()) {
+                  <mat-spinner diameter="20"></mat-spinner>
+                } @else {
+                  <i class="fas fa-chart-line"></i>
+                }
+                {{ isLoading() ? 'Analyzing...' : 'Analyze Match' }}
               </button>
               <button mat-raised-button type="button" (click)="clearForm()">
                 <i class="fas fa-redo"></i>
@@ -186,46 +190,83 @@ import { CommonModule } from "@angular/common";
   `,
   ],
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    MaterialModule,
-    InsightsComponent,
-  ],
+  imports: [ReactiveFormsModule, MaterialModule, InsightsComponent],
 })
 export class MatchAnalysisComponent implements OnInit {
-  matchForm!: FormGroup;
-  hasResults = false;
+  // Inject dependencies using modern inject() function
+  private route = inject(ActivatedRoute);
+  private fb = inject(FormBuilder);
 
-  constructor(
-    private route: ActivatedRoute,
-    private fb: FormBuilder,
-  ) {}
+  // Signals for reactive state management
+  matchForm = signal<FormGroup>(this.createForm());
+  hasResults = signal(false);
+  isLoading = signal(false);
+  errorMessage = signal<string | null>(null);
+
+  // Computed signals
+  isFormValid = computed(() => this.matchForm().valid);
+  matchId = signal("");
+  playerNames = signal("");
+
+  // Form validation messages as signals
+  validationMessages = computed(() => ({
+    matchId: this.matchForm().get("matchId")?.hasError("required") ? "Match ID is required" : null,
+    playerNames: this.matchForm().get("playerNames")?.hasError("required")
+      ? "At least one player name is required"
+      : null,
+  }));
+
+  constructor() {
+    // Effect to watch for form changes
+    effect(() => {
+      const form = this.matchForm();
+      if (form) {
+        this.matchId.set(form.get("matchId")?.value || "");
+        this.playerNames.set(form.get("playerNames")?.value || "");
+      }
+    });
+  }
 
   ngOnInit(): void {
-    this.matchForm = this.fb.group({
-      matchId: ["", [Validators.required]],
-      playerNames: ["", [Validators.required]],
-    });
-
-    // Check for query parameters
-    this.route.queryParams.subscribe((params) => {
-      if (params['matchId']) {
-        this.matchForm.patchValue({
-          matchId: params['matchId'],
+    // Modern reactive approach with takeUntilDestroyed
+    this.route.queryParams.pipe(takeUntilDestroyed()).subscribe((params) => {
+      const form = this.matchForm();
+      if (params["matchId"]) {
+        form.patchValue({
+          matchId: params["matchId"],
         });
       }
-      if (params['players']) {
-        const players = Array.isArray(params['players']) ? params['players'].join(", ") : params['players'];
-        this.matchForm.patchValue({
+      if (params["players"]) {
+        const players = Array.isArray(params["players"]) ? params["players"].join(", ") : params["players"];
+        form.patchValue({
           playerNames: players,
         });
       }
     });
   }
 
+  private createForm(): FormGroup {
+    return this.fb.group({
+      matchId: ["", [Validators.required]],
+      playerNames: ["", [Validators.required]],
+    });
+  }
+
   clearForm(): void {
-    this.matchForm.reset();
-    this.hasResults = false;
+    this.matchForm().reset();
+    this.hasResults.set(false);
+    this.errorMessage.set(null);
+  }
+
+  onSubmit(): void {
+    if (this.isFormValid()) {
+      this.isLoading.set(true);
+      this.errorMessage.set(null);
+      // TODO: Implement actual match analysis logic
+      console.log("Analyzing match:", {
+        matchId: this.matchId(),
+        playerNames: this.playerNames(),
+      });
+    }
   }
 }
