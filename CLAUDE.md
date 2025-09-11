@@ -26,46 +26,62 @@ DINNR is a PUBG analytics platform that transforms raw telemetry data into clear
 ## Project Structure
 
 ```
-src/
-├── app/
-│   ├── core/              # Core services and models
-│   │   ├── services/      # API services, telemetry processing
-│   │   ├── models/        # TypeScript interfaces and types
-│   │   ├── interceptors/  # HTTP interceptors
-│   │   └── guards/        # Route guards
-│   ├── features/          # Feature modules
-│   │   ├── match-analysis/  # Match analysis functionality
-│   │   └── shared/        # Shared components and utilities
-│   ├── layout/            # Layout components
-│   └── app.module.ts      # Root module
-├── assets/                # Static assets
-└── environments/          # Environment configurations
+frontend/
+├── src/
+│   ├── app/
+│   │   ├── core/              # Core services and models
+│   │   │   ├── services/      # API services, telemetry processing
+│   │   │   ├── models/        # TypeScript interfaces and types
+│   │   │   ├── interceptors/  # HTTP interceptors
+│   │   │   └── guards/        # Route guards
+│   │   ├── features/          # Feature modules
+│   │   │   ├── match-analysis/  # Match analysis functionality
+│   │   │   └── shared/        # Shared components and utilities
+│   │   ├── layout/            # Layout components
+│   │   └── app.module.ts      # Root module
+│   ├── assets/                # Static assets
+│   └── environments/          # Environment configurations
+├── angular.json               # Angular CLI configuration
+├── package.json              # Frontend dependencies
+└── tsconfig.json             # TypeScript configuration
+docs/                         # Project documentation
+tests/                        # Test files
 ```
 
 ## Common Development Commands
 
 ### Project Setup
 ```bash
-npm install
-ng serve
+npm install                    # Install root dependencies
+npm run install:frontend      # Install frontend dependencies
+npm start                     # Start development server
 ```
 
 ### Building
 ```bash
-ng build              # Development build
-ng build --prod      # Production build
+npm run build                 # Development build
+npm run build:prod           # Production build
+npm run build:local          # Local development build
 ```
 
 ### Testing
 ```bash
-ng test              # Unit tests
-ng e2e               # End-to-end tests
+npm test                     # Unit tests
 ```
 
-### Linting
+### Development
 ```bash
-ng lint              # Run linting
-ng lint --fix       # Fix linting issues
+npm start                    # Start development server
+npm run start:local          # Start with local configuration
+```
+
+### Frontend-specific commands (run from frontend/ directory)
+```bash
+cd frontend
+ng serve                     # Start development server
+ng build                     # Build the application
+ng test                      # Run unit tests
+ng generate component name   # Generate new component
 ```
 
 ## Core Services

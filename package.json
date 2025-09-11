@@ -7,7 +7,14 @@
     "doc": "docs"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "ng": "cd frontend && ng",
+    "start": "cd frontend && npm run start",
+    "start:local": "cd frontend && npm run start:local",
+    "build": "cd frontend && npm run build",
+    "build:prod": "cd frontend && npm run build:prod",
+    "build:local": "cd frontend && npm run build:local",
+    "test": "cd frontend && npm run test",
+    "install:frontend": "cd frontend && npm install"
   },
   "repository": {
     "type": "git",
@@ -21,9 +28,5 @@
     "url": "https://github.com/J03Fr0st/DINNR/issues"
   },
   "homepage": "https://github.com/J03Fr0st/DINNR#readme",
-  "devDependencies": {
-    "@angular-devkit/build-angular": "^17.3.17",
-    "@angular/cli": "^17.3.17",
-    "typescript": "^5.4.5"
-  }
+  "devDependencies": {}
 }
