@@ -16,7 +16,7 @@ export class PubgApiService {
   constructor() {
     this.pubgClient = new PubgClient({
       apiKey: environment.pubgApiKey,
-      shard: 'pc-na'
+      shard: 'steam'
     });
   }
 
@@ -38,8 +38,8 @@ export class PubgApiService {
     this.cache.set(key, { data, timestamp: Date.now() });
   }
 
-  getPlayerByName(playerName: string, shard: ApiShard = 'pc-na' as ApiShard): Observable<Player> {
-    const cacheKey = this.getCacheKey(`player-${playerName}`, { shard });
+  getPlayerByName(playerName: string): Observable<Player> {
+    const cacheKey = this.getCacheKey(`player-${playerName}`);
     const cached = this.getFromCache<Player>(cacheKey);
     if (cached) {
       return of(cached);
@@ -64,8 +64,8 @@ export class PubgApiService {
     });
   }
 
-  getMatch(matchId: string, shard: ApiShard = 'pc-na' as ApiShard): Observable<Match> {
-    const cacheKey = this.getCacheKey(`match-${matchId}`, { shard });
+  getMatch(matchId: string): Observable<Match> {
+    const cacheKey = this.getCacheKey(`match-${matchId}`);
     const cached = this.getFromCache<Match>(cacheKey);
     if (cached) {
       return of(cached);
@@ -107,8 +107,8 @@ export class PubgApiService {
     });
   }
 
-  getPlayerMatches(playerId: string, shard: ApiShard = 'pc-na' as ApiShard): Observable<Match[]> {
-    const cacheKey = this.getCacheKey(`player-matches-${playerId}`, { shard });
+  getPlayerMatches(playerId: string): Observable<Match[]> {
+    const cacheKey = this.getCacheKey(`player-matches-${playerId}`);
     const cached = this.getFromCache<Match[]>(cacheKey);
     if (cached) {
       return of(cached);
@@ -160,8 +160,8 @@ export class PubgApiService {
     });
   }
 
-  getPlayerSeasonStats(playerId: string, seasonId: string, shard: ApiShard = 'pc-na' as ApiShard): Observable<any> {
-    const cacheKey = this.getCacheKey(`player-season-stats-${playerId}-${seasonId}`, { shard });
+  getPlayerSeasonStats(playerId: string, seasonId: string): Observable<any> {
+    const cacheKey = this.getCacheKey(`player-season-stats-${playerId}-${seasonId}`);
     const cached = this.getFromCache<any>(cacheKey);
     if (cached) {
       return of(cached);

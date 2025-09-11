@@ -18,8 +18,8 @@ import { MatchAnalysis, PlayerAnalysis, PlayerMatchStats, PlayerInsights, MatchS
 export class TelemetryService {
   constructor(private pubgApiService: PubgApiService) {}
 
-  analyzeMatch(matchId: string, playerNames: string[], shard: ApiShard = 'pc-na' as ApiShard): Observable<MatchAnalysis> {
-    return this.pubgApiService.getMatch(matchId, shard).pipe(
+  analyzeMatch(matchId: string, playerNames: string[]): Observable<MatchAnalysis> {
+    return this.pubgApiService.getMatch(matchId).pipe(
       switchMap(match => {
         return this.pubgApiService.getTelemetry((match as any).relationships?.assets?.data[0]?.attributes?.URL || '').pipe(
           map(telemetry => this.processTelemetry(telemetry, playerNames, match)),

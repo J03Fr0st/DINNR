@@ -29,8 +29,8 @@
           <mat-label>Region/Shard</mat-label>
           <i class="fas fa-globe mat-prefix" matPrefix></i>
           <mat-select formControlName="shard">
-            <mat-option *ngFor="let shard of shards" [value]="shard.value">
-              {{ shard.label }}
+            <mat-option *ngFor="let region of availableRegions" [value]="region.value">
+              {{ region.label }}
             </mat-option>
           </mat-select>
           <mat-hint>Select the player's gaming region</mat-hint>
@@ -67,7 +67,7 @@
     <div class="results-header">
       <h2>Player Analysis Results</h2>
       <div class="match-info">
-        <strong>{{ analysis.playerName || 'Unknown' }}</strong> • {{ analysis.shard || 'Unknown' }}
+        <strong>{{ analysis.playerName || 'Unknown' }}</strong> • {{ analysis.region || 'Steam' }}
       </div>
     </div>
 

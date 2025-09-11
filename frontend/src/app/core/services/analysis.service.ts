@@ -53,7 +53,7 @@ export class AnalysisService {
     private telemetryService: TelemetryService
   ) {}
 
-  analyzeMatch(matchId: string, playerNames: string[], shard: ApiShard = 'pc-na' as ApiShard): Observable<MatchAnalysis> {
+  analyzeMatch(matchId: string, playerNames: string[]): Observable<MatchAnalysis> {
     if (!this.validateMatchId(matchId)) {
       return throwError(() => new Error('Invalid match ID format'));
     }
@@ -62,23 +62,23 @@ export class AnalysisService {
       return throwError(() => new Error('At least one player name is required'));
     }
 
-    return this.telemetryService.analyzeMatch(matchId, playerNames, shard);
+    return this.telemetryService.analyzeMatch(matchId, playerNames);
   }
 
-  getPlayerStats(playerName: string, shard: ApiShard = 'pc-na' as ApiShard): Observable<PlayerStats> {
+  getPlayerStats(playerName: string): Observable<PlayerStats> {
     if (!playerName || playerName.trim().length === 0) {
       return throwError(() => new Error('Player name is required'));
     }
 
-    return this.pubgApiService.getPlayerByName(playerName, shard).pipe(
-      switchMap(player => this.pubgApiService.getPlayerMatches(player.id, shard).pipe(
+    return this.pubgApiService.getPlayerByName(playerName).pipe(
+      switchMap(player => this.pubgApiService.getPlayerMatches(player.id).pipe(
         map(matches => this.calculatePlayerStats(player, matches))
       ))
     );
   }
 
   getPlayerHistory(playerName: string, shard: ApiShard = 'pc-na' as ApiShard): Observable<MatchHistory[]> {
-    return this.getPlayerStats(playerName, shard).pipe(
+    return this.getPlayerStats(playerName).pipe(
       map(stats => stats.recentMatches.map(match => ({
         ...match,
         playerName: stats.playerName
@@ -86,21 +86,21 @@ export class AnalysisService {
     );
   }
 
-  comparePlayers(playerNames: string[], shard: ApiShard = 'pc-na' as ApiShard): Observable<PlayerStats[]> {
+  comparePlayers(playerNames: string[]): Observable<PlayerStats[]> {
     if (!playerNames || playerNames.length < 2) {
       return throwError(() => new Error('At least two players are required for comparison'));
     }
 
-    const playerObservables = playerNames.map(name => this.getPlayerStats(name, shard));
+    const playerObservables = playerNames.map(name => this.getPlayerStats(name));
     return forkJoin(playerObservables);
   }
 
   submitMatchAnalysis(form: MatchAnalysisForm): Observable<MatchAnalysis> {
-    return this.analyzeMatch(form.matchId, form.playerNames, form.shard as ApiShard);
+    return this.analyzeMatch(form.matchId, form.playerNames);
   }
 
   searchPlayer(form: PlayerSearchForm): Observable<PlayerStats> {
-    return this.getPlayerStats(form.playerName, form.shard as ApiShard);
+    return this.getPlayerStats(form.playerName);
   }
 
   private calculatePlayerStats(player: Player, matches: Match[]): PlayerStats {

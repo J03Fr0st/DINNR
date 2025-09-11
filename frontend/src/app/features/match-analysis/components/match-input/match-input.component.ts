@@ -6,7 +6,7 @@ import { PubgApiService } from '../../../../core/services';
 
 interface PlayerAnalysis {
   playerName: string;
-  shard: string;
+  region: string;
   stats: {
     kills: number;
     wins: number;
@@ -29,7 +29,10 @@ export class MatchInputComponent implements OnInit {
   playerForm!: FormGroup;
   loading = false;
   analysis: PlayerAnalysis | null = null;
-  shards = [
+  
+  // Available regions for display purposes
+  availableRegions = [
+    { value: 'steam', label: 'Steam' },
     { value: 'pc-na', label: 'North America' },
     { value: 'pc-eu', label: 'Europe' },
     { value: 'pc-as', label: 'Asia' },
@@ -39,8 +42,7 @@ export class MatchInputComponent implements OnInit {
     { value: 'pc-jp', label: 'Japan' },
     { value: 'pc-oc', label: 'Oceania' },
     { value: 'pc-sa', label: 'South America' },
-    { value: 'pc-ru', label: 'Russia' },
-    { value: 'steam', label: 'Steam' }
+    { value: 'pc-ru', label: 'Russia' }
   ];
 
   constructor(
@@ -65,8 +67,8 @@ export class MatchInputComponent implements OnInit {
     this.loading = true;
     const formData = this.playerForm.value;
 
-    // Use real PUBG API
-    this.pubgApiService.getPlayerByName(formData.playerName, formData.shard as any)
+    // Use real PUBG API (shard is handled at client level)
+    this.pubgApiService.getPlayerByName(formData.playerName)
       .pipe(
         finalize(() => {
           this.loading = false;
@@ -75,7 +77,7 @@ export class MatchInputComponent implements OnInit {
       .subscribe({
         next: (player) => {
           // Get player stats and create analysis
-          this.processPlayerData(player, formData.shard);
+          this.processPlayerData(player);
         },
         error: (error) => {
           console.error('API Error:', error);
@@ -84,14 +86,14 @@ export class MatchInputComponent implements OnInit {
       });
   }
 
-  private processPlayerData(player: any, shard: string): void {
+  private processPlayerData(player: any): void {
     // Extract stats from player data
     const stats = this.extractPlayerStats(player);
     const insights = this.generateInsights(stats);
 
     this.analysis = {
       playerName: player.attributes.name,
-      shard: shard,
+      region: 'Steam', // Default since all queries use the steam shard
       stats: stats,
       insights: insights
     };

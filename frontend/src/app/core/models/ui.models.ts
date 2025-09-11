@@ -29,12 +29,10 @@ export interface HeatmapData {
 export interface MatchAnalysisForm {
   matchId: string;
   playerNames: string[];
-  shard: string;
 }
 
 export interface PlayerSearchForm {
   playerName: string;
-  shard: string;
 }
 
 export interface FilterOptions {
