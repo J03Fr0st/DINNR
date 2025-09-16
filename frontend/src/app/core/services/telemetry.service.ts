@@ -344,7 +344,7 @@ export class TelemetryService {
           if (fireEvent.character?.name === playerName) {
             const fired = fireEvent.fireCount ?? 0;
             shotsFired += fired;
-            const weaponName = fireEvent.weaponId ?? fireEvent.character.primaryWeaponFirst ?? "Unknown";
+            const weaponName = fireEvent.weaponId ?? "Unknown";
             this.incrementWeaponShots(weaponStats, weaponName, fired);
           }
           break;

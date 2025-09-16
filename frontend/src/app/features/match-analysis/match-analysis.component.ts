@@ -1,4 +1,5 @@
 import { Component, OnInit, signal, computed, inject } from "@angular/core";
+import { DecimalPipe } from "@angular/common";
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from "@angular/forms";
 import { ActivatedRoute } from "@angular/router";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
@@ -325,6 +326,7 @@ import { TeamComparisonComponent } from "./components/team-comparison/team-compa
   ],
   standalone: true,
   imports: [
+    DecimalPipe,
     ReactiveFormsModule,
     MaterialModule,
     InsightsComponent,
@@ -347,9 +349,7 @@ export class MatchAnalysisComponent implements OnInit {
   analysisResult = signal<MatchAnalysis | null>(null);
   isLoading = signal(false);
   errorMessage = signal<string | null>(null);
-
-  // Computed signals
-  isFormValid = computed(() => this.matchForm().valid);
+  isFormValid = signal(this.matchForm().valid);
 
   // Form validation messages as signals
   validationMessages = computed(() => ({
@@ -385,9 +385,19 @@ export class MatchAnalysisComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    const form = this.matchForm();
+
+    // Keep the form validity signal in sync with reactive form changes
+    this.isFormValid.set(form.valid);
+    form.statusChanges.pipe(takeUntilDestroyed()).subscribe(() => {
+      this.isFormValid.set(form.valid);
+    });
+    form.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
+      this.isFormValid.set(form.valid);
+    });
+
     // Modern reactive approach with takeUntilDestroyed
     this.route.queryParams.pipe(takeUntilDestroyed()).subscribe((params) => {
-      const form = this.matchForm();
       if (params["matchId"]) {
         form.patchValue({
           matchId: params["matchId"],
@@ -399,6 +409,7 @@ export class MatchAnalysisComponent implements OnInit {
           playerNames: players,
         });
       }
+      this.isFormValid.set(form.valid);
     });
   }
 
@@ -410,10 +421,14 @@ export class MatchAnalysisComponent implements OnInit {
   }
 
   clearForm(): void {
-    this.matchForm().reset();
+    this.matchForm().reset({
+      matchId: "",
+      playerNames: "",
+    });
     this.analysisResult.set(null);
     this.errorMessage.set(null);
     this.isLoading.set(false);
+    this.isFormValid.set(this.matchForm().valid);
   }
 
   onSubmit(): void {

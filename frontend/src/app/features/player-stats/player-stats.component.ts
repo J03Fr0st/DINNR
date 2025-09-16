@@ -1,5 +1,5 @@
 import { CommonModule } from "@angular/common";
-import { Component, type OnInit, signal, computed, inject } from "@angular/core";
+import { Component, type OnInit, signal, computed, inject, DestroyRef } from "@angular/core";
 import { FormBuilder, type FormGroup, Validators, ReactiveFormsModule } from "@angular/forms";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { MatCardModule } from "@angular/material/card";
@@ -385,15 +385,16 @@ export class PlayerStatsComponent implements OnInit {
   // Inject dependencies using modern inject() function
   private fb = inject(FormBuilder);
   private analysisService = inject(AnalysisService);
+  private destroyRef = inject(DestroyRef);
 
   // Signals for reactive state management
   playerForm = signal<FormGroup>(this.createForm());
   isLoading = signal(false);
   errorMessage = signal<string | null>(null);
   playerStats = signal<PlayerStats | null>(null);
+  isFormValid = signal(false);
 
   // Computed signals
-  isFormValid = computed(() => this.playerForm().valid);
   // Features list as signal
   features = signal([
     "Historical performance tracking",
@@ -412,7 +413,22 @@ export class PlayerStatsComponent implements OnInit {
   }));
 
   ngOnInit(): void {
-    // Form is already created in the signal initialization
+    // Set up form change detection to update isFormValid signal
+    this.playerForm().valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.isFormValid.set(this.playerForm().valid);
+      });
+
+    // Also listen to status changes (for validation state changes)
+    this.playerForm().statusChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.isFormValid.set(this.playerForm().valid);
+      });
+
+    // Set initial validation state
+    this.isFormValid.set(this.playerForm().valid);
   }
 
   private createForm(): FormGroup {
@@ -426,6 +442,7 @@ export class PlayerStatsComponent implements OnInit {
     this.playerStats.set(null);
     this.errorMessage.set(null);
     this.isLoading.set(false);
+    this.isFormValid.set(this.playerForm().valid);
   }
 
   onSubmit(): void {
@@ -446,7 +463,7 @@ export class PlayerStatsComponent implements OnInit {
 
     this.analysisService
       .getPlayerStats(playerName)
-      .pipe(takeUntilDestroyed())
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (stats) => {
           this.playerStats.set(stats);

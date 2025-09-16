@@ -74,29 +74,29 @@
           <div class="insights-section">
             <div class="insights-group" *ngIf="player.insights.strengths.length > 0">
               <h4>Strengths</h4>
-              <mat-chip-list>
+              <mat-chip-set>
                 <mat-chip *ngFor="let strength of player.insights.strengths" color="primary">
                   {{ strength }}
                 </mat-chip>
-              </mat-chip-list>
+              </mat-chip-set>
             </div>
 
             <div class="insights-group" *ngIf="player.insights.weaknesses.length > 0">
               <h4>Weaknesses</h4>
-              <mat-chip-list>
+              <mat-chip-set>
                 <mat-chip *ngFor="let weakness of player.insights.weaknesses" color="warn">
                   {{ weakness }}
                 </mat-chip>
-              </mat-chip-list>
+              </mat-chip-set>
             </div>
 
             <div class="insights-group" *ngIf="player.insights.recommendations.length > 0">
               <h4>Recommendations</h4>
-              <mat-chip-list>
+              <mat-chip-set>
                 <mat-chip *ngFor="let recommendation of player.insights.recommendations" color="accent">
                   {{ recommendation }}
                 </mat-chip>
-              </mat-chip-list>
+              </mat-chip-set>
             </div>
           </div>
         </div>
