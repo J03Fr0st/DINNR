@@ -1,6 +1,7 @@
 import { CommonModule } from "@angular/common";
 import { Component, type OnInit, signal, computed, inject, DestroyRef } from "@angular/core";
 import { FormBuilder, type FormGroup, Validators, ReactiveFormsModule } from "@angular/forms";
+import { Router } from "@angular/router";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { MatCardModule } from "@angular/material/card";
 import { MatFormFieldModule } from "@angular/material/form-field";
@@ -131,7 +132,7 @@ import { AnalysisService } from "../../core/services/analysis.service";
                   </thead>
                   <tbody>
                     @for (match of stats.recentMatches; track match.matchId) {
-                      <tr>
+                      <tr class="clickable-row" (click)="navigateToMatchAnalysis(match.matchId, stats.playerName)">
                         <td>{{ formatDate(match.date) }}</td>
                         <td>{{ match.mapName }}</td>
                         <td>{{ match.gameMode }}</td>
@@ -306,6 +307,15 @@ import { AnalysisService } from "../../core/services/analysis.service";
       background: rgba(102, 126, 234, 0.05);
     }
 
+    .clickable-row {
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .clickable-row:hover {
+      background: rgba(102, 126, 234, 0.08) !important;
+    }
+
     .empty-state {
       margin: 0;
       color: #777;
@@ -386,6 +396,7 @@ export class PlayerStatsComponent implements OnInit {
   private fb = inject(FormBuilder);
   private analysisService = inject(AnalysisService);
   private destroyRef = inject(DestroyRef);
+  private router = inject(Router);
 
   // Signals for reactive state management
   playerForm = signal<FormGroup>(this.createForm());
@@ -490,5 +501,14 @@ export class PlayerStatsComponent implements OnInit {
     const minutes = Math.floor(total / 60);
     const remaining = total % 60;
     return `${minutes}:${remaining.toString().padStart(2, "0")}`;
+  }
+
+  navigateToMatchAnalysis(matchId: string, playerName: string): void {
+    this.router.navigate(['/match-analysis'], {
+      queryParams: {
+        matchId: matchId,
+        playerNames: playerName
+      }
+    });
   }
 }

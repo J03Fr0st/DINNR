@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, computed, inject } from "@angular/core";
+import { Component, OnInit, signal, computed, inject, DestroyRef } from "@angular/core";
 import { DecimalPipe } from "@angular/common";
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from "@angular/forms";
 import { ActivatedRoute } from "@angular/router";
@@ -343,6 +343,7 @@ export class MatchAnalysisComponent implements OnInit {
   private fb = inject(FormBuilder);
   private analysisService = inject(AnalysisService);
   private visualizationService = inject(VisualizationService);
+  private destroyRef = inject(DestroyRef);
 
   // Signals for reactive state management
   matchForm = signal<FormGroup>(this.createForm());
@@ -389,15 +390,15 @@ export class MatchAnalysisComponent implements OnInit {
 
     // Keep the form validity signal in sync with reactive form changes
     this.isFormValid.set(form.valid);
-    form.statusChanges.pipe(takeUntilDestroyed()).subscribe(() => {
+    form.statusChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.isFormValid.set(form.valid);
     });
-    form.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
+    form.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.isFormValid.set(form.valid);
     });
 
     // Modern reactive approach with takeUntilDestroyed
-    this.route.queryParams.pipe(takeUntilDestroyed()).subscribe((params) => {
+    this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
       if (params["matchId"]) {
         form.patchValue({
           matchId: params["matchId"],
@@ -407,6 +408,12 @@ export class MatchAnalysisComponent implements OnInit {
         const players = Array.isArray(params["players"]) ? params["players"].join(", ") : params["players"];
         form.patchValue({
           playerNames: players,
+        });
+      }
+      if (params["playerNames"]) {
+        const playerNames = Array.isArray(params["playerNames"]) ? params["playerNames"].join(", ") : params["playerNames"];
+        form.patchValue({
+          playerNames: playerNames,
         });
       }
       this.isFormValid.set(form.valid);
@@ -450,7 +457,7 @@ export class MatchAnalysisComponent implements OnInit {
 
     this.analysisService
       .analyzeMatch(matchId, players)
-      .pipe(takeUntilDestroyed())
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (analysis) => {
           this.analysisResult.set(analysis);

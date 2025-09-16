@@ -1,6 +1,7 @@
 import { Injectable } from "@angular/core";
-import { type Observable, throwError } from "rxjs";
+import { type Observable, throwError, of } from "rxjs";
 import { catchError, map, switchMap } from "rxjs/operators";
+import { environment } from "../../../environments/environment";
 import {
   type LogGameStatePeriodic,
   type LogHeal,
@@ -18,6 +19,7 @@ import {
   type LogVehicleRide,
   type LogWeaponFireCount,
   type Match,
+  type MatchResponse,
   type TelemetryEvent,
   type Location as TelemetryLocation,
 } from "../models";
@@ -64,9 +66,9 @@ export class TelemetryService {
 
   analyzeMatch(matchId: string, playerNames: string[]): Observable<MatchAnalysis> {
     return this.pubgApiService.getMatch(matchId).pipe(
-      switchMap((match) =>
-        this.pubgApiService.getTelemetry(this.extractTelemetryUrl(match)).pipe(
-          map((telemetry) => this.processTelemetry(telemetry, playerNames, match)),
+      switchMap((matchResponse) =>
+        this.pubgApiService.getTelemetry(this.extractTelemetryUrl(matchResponse)).pipe(
+          map((telemetry) => this.processTelemetry(telemetry, playerNames, matchResponse.data)),
           catchError((error) => {
             console.error("Error processing telemetry:", error);
             return throwError(() => new Error(`Failed to analyze match: ${error.message}`));
@@ -81,6 +83,20 @@ export class TelemetryService {
   }
 
   private processTelemetry(telemetry: TelemetryEvent[], playerNames: string[], match: Match): MatchAnalysis {
+    console.log("TelemetryService.processTelemetry called with:", {
+      telemetryType: typeof telemetry,
+      telemetryIsArray: Array.isArray(telemetry),
+      telemetryLength: Array.isArray(telemetry) ? telemetry.length : 'N/A',
+      playerNames,
+      matchId: match.id
+    });
+
+    // Defensive programming: ensure telemetry is an array
+    if (!Array.isArray(telemetry)) {
+      console.error("Telemetry data is not an array:", typeof telemetry, telemetry);
+      throw new Error("Telemetry data is not in the expected array format");
+    }
+
     const matchStartEvent = telemetry.find((event) => event._T === "LogMatchStart") as LogMatchStart | undefined;
     const matchEndEvent = telemetry.find((event) => event._T === "LogMatchEnd") as LogMatchEnd | undefined;
 
@@ -177,7 +193,7 @@ export class TelemetryService {
       switch (event._T) {
         case "LogPlayerPosition": {
           const positionEvent = event as LogPlayerPosition;
-          if (positionEvent.character.name !== playerName) {
+          if (positionEvent.character?.name !== playerName) {
             break;
           }
 
@@ -209,7 +225,7 @@ export class TelemetryService {
         case "LogPlayerKill": {
           const killEvent = event as LogPlayerKill;
 
-          if (killEvent.killer.name === playerName) {
+          if (killEvent.killer?.name === playerName) {
             kills += 1;
             accountId = accountId ?? killEvent.killer.accountId ?? null;
             const distance = this.toMeters(killEvent.distance);
@@ -226,14 +242,14 @@ export class TelemetryService {
               position: killEvent.killer.location,
               details: {
                 killer: killEvent.killer.name,
-                victim: killEvent.victim.name,
+                victim: killEvent.victim?.name || "Unknown",
                 weapon: killEvent.damageCauserName,
                 distance,
               },
             });
           }
 
-          if (killEvent.victim.name === playerName) {
+          if (killEvent.victim?.name === playerName) {
             deaths += 1;
             accountId = accountId ?? killEvent.victim.accountId ?? null;
             placement = this.extractRankFromKillEvent(killEvent) ?? placement;
@@ -243,7 +259,7 @@ export class TelemetryService {
               event: "death",
               position: killEvent.victim.location,
               details: {
-                killer: killEvent.killer.name,
+                killer: killEvent.killer?.name || "Unknown",
                 victim: killEvent.victim.name,
                 weapon: killEvent.damageCauserName,
                 distance: this.toMeters(killEvent.distance),
@@ -251,7 +267,7 @@ export class TelemetryService {
             });
           }
 
-          if (killEvent.assistant && killEvent.assistant.name === playerName) {
+          if (killEvent.assistant?.name === playerName) {
             assists += 1;
           }
 
@@ -261,7 +277,7 @@ export class TelemetryService {
         case "LogPlayerKillV2": {
           const killEvent = event as LogPlayerKillV2;
 
-          if (killEvent.killer.name === playerName) {
+          if (killEvent.killer?.name === playerName) {
             kills += 1;
             accountId = accountId ?? killEvent.killer.accountId ?? null;
             const distance = this.toMeters(killEvent.distance);
@@ -278,14 +294,14 @@ export class TelemetryService {
               position: killEvent.killer.location,
               details: {
                 killer: killEvent.killer.name,
-                victim: killEvent.victim.name,
+                victim: killEvent.victim?.name || "Unknown",
                 weapon: killEvent.damageCauserName,
                 distance,
               },
             });
           }
 
-          if (killEvent.victim.name === playerName) {
+          if (killEvent.victim?.name === playerName) {
             deaths += 1;
             accountId = accountId ?? killEvent.victim.accountId ?? null;
             placement = this.extractRankFromKillEvent(killEvent) ?? placement;
@@ -295,7 +311,7 @@ export class TelemetryService {
               event: "death",
               position: killEvent.victim.location,
               details: {
-                killer: killEvent.killer.name,
+                killer: killEvent.killer?.name || "Unknown",
                 victim: killEvent.victim.name,
                 weapon: killEvent.damageCauserName,
                 distance: this.toMeters(killEvent.distance),
@@ -303,7 +319,7 @@ export class TelemetryService {
             });
           }
 
-          assists += killEvent.assists?.filter((assistant) => assistant.name === playerName).length ?? 0;
+          assists += killEvent.assists?.filter((assistant) => assistant?.name === playerName).length ?? 0;
 
           break;
         }
@@ -352,7 +368,7 @@ export class TelemetryService {
 
         case "LogHeal": {
           const healEvent = event as LogHeal;
-          if (healEvent.character.name === playerName) {
+          if (healEvent.character?.name === playerName) {
             healthUsed += healEvent.healAmount ?? 0;
             const itemId = healEvent.item.itemId ?? "Unknown";
             if (!healingItems[itemId]) {
@@ -397,7 +413,7 @@ export class TelemetryService {
 
         case "LogVehicleRide": {
           const rideEvent = event as LogVehicleRide;
-          if (rideEvent.character.name === playerName) {
+          if (rideEvent.character?.name === playerName) {
             const key = this.getVehicleKey(rideEvent.vehicle);
             if (timestamp !== null) {
               activeVehicleRides.set(key, timestamp);
@@ -415,7 +431,7 @@ export class TelemetryService {
 
         case "LogVehicleLeave": {
           const leaveEvent = event as LogVehicleLeave;
-          if (leaveEvent.character.name === playerName) {
+          if (leaveEvent.character?.name === playerName) {
             const key = this.getVehicleKey(leaveEvent.vehicle);
             vehicleDistance += this.toMeters(leaveEvent.rideDistance ?? 0);
             const startTime = activeVehicleRides.get(key);
@@ -437,7 +453,7 @@ export class TelemetryService {
 
         case "LogSwimStart": {
           const swimStart = event as LogSwimStart;
-          if (swimStart.character.name === playerName) {
+          if (swimStart.character?.name === playerName) {
             activeSwimStart = timestamp ?? activeSwimStart;
           }
           break;
@@ -445,7 +461,7 @@ export class TelemetryService {
 
         case "LogSwimEnd": {
           const swimEnd = event as LogSwimEnd;
-          if (swimEnd.character.name === playerName) {
+          if (swimEnd.character?.name === playerName) {
             const distance = this.toMeters(swimEnd.swimDistance ?? 0);
             swimDistance += distance;
             if (activeSwimStart && timestamp !== null) {
@@ -466,13 +482,13 @@ export class TelemetryService {
 
         case "LogPlayerRevive": {
           const reviveEvent = event as LogPlayerRevive;
-          if (reviveEvent.reviver.name === playerName || reviveEvent.victim.name === playerName) {
+          if (reviveEvent.reviver?.name === playerName || reviveEvent.victim?.name === playerName) {
             timeline.push({
               time: timestamp ?? Date.now(),
-              event: reviveEvent.reviver.name === playerName ? "revive" : "revived",
+              event: reviveEvent.reviver?.name === playerName ? "revive" : "revived",
               details: {
-                killer: reviveEvent.reviver.name,
-                victim: reviveEvent.victim.name,
+                killer: reviveEvent.reviver?.name || "Unknown",
+                victim: reviveEvent.victim?.name || "Unknown",
               },
             });
           }
@@ -681,8 +697,8 @@ export class TelemetryService {
 
     return killEvents.slice(0, 10).map((event) => {
       const timestamp = this.toTimestamp(event._D) ?? Date.now();
-      const killer = event.killer.name;
-      const victim = event.victim.name;
+      const killer = event.killer?.name || "Unknown";
+      const victim = event.victim?.name || "Unknown";
 
       return {
         timestamp,
@@ -694,19 +710,54 @@ export class TelemetryService {
     });
   }
 
-  private extractTelemetryUrl(match: Match): string {
-    const matchData = match as unknown as {
-      relationships?: {
-        assets?: {
-          data?: Array<{
-            attributes?: {
-              URL?: string;
-            };
-          }>;
-        };
-      };
-    };
-    return matchData.relationships?.assets?.data?.[0]?.attributes?.URL ?? "";
+  private extractTelemetryUrl(matchResponse: MatchResponse): string {
+    console.log("TelemetryService.extractTelemetryUrl - Full match response:", {
+      matchId: matchResponse.data.id,
+      hasIncluded: !!matchResponse.included,
+      includedLength: matchResponse.included?.length || 0,
+      included: matchResponse.included,
+      matchRelationships: matchResponse.data.relationships
+    });
+
+    // Look for assets in the included section
+    const assets = matchResponse.included?.filter(item => item.type === 'asset') || [];
+
+    console.log("TelemetryService.extractTelemetryUrl - Found assets:", {
+      assetCount: assets.length,
+      assets: assets
+    });
+
+    if (assets.length === 0) {
+      console.error("TelemetryService.extractTelemetryUrl - No assets found in included section");
+      throw new Error("Telemetry data not available for this match. No assets found in the response.");
+    }
+
+    // Get the first asset (which should be the telemetry asset)
+    const telemetryAsset = assets[0];
+    const attributes = telemetryAsset.attributes as any;
+
+    console.log("TelemetryService.extractTelemetryUrl - Asset attributes:", attributes);
+
+    let telemetryUrl = "";
+    if (attributes) {
+      // Try various common property names used by PUBG API
+      telemetryUrl = attributes.URL ||
+                     attributes.url ||
+                     attributes.downloadUrl ||
+                     attributes.download_url ||
+                     attributes.link ||
+                     attributes.href ||
+                     "";
+    }
+
+    if (!telemetryUrl) {
+      console.error("TelemetryService.extractTelemetryUrl - No telemetry URL found in asset");
+      console.error("Available properties in attributes:", attributes ? Object.keys(attributes) : 'No attributes');
+      throw new Error("Telemetry data not available for this match. The match may be too old or telemetry data is missing.");
+    }
+
+    console.log("TelemetryService.extractTelemetryUrl - Extracted URL:", telemetryUrl);
+    return telemetryUrl;
   }
 
   private incrementWeaponKills(stats: Record<string, WeaponAggregation>, weaponName: string, isHeadshot: boolean): void {
