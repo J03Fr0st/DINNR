@@ -113,9 +113,9 @@ import { TeamComparisonComponent } from "./components/team-comparison/team-compa
           Has insights: {{ !!analysis.insights }}<br>
           Insights type: {{ typeof analysis.insights }}<br>
           Insights keys: {{ analysis.insights ? Object.keys(analysis.insights).join(', ') : 'No insights' }}<br>
-          Overall quality: {{ analysis.insights?.overallMatchQuality }}<br>
-          Key moments count: {{ analysis.insights?.keyMoments?.length || 0 }}<br>
-          Strategic insights count: {{ analysis.insights?.strategicInsights?.length || 0 }}<br>
+          Overall quality: {{ analysis.insights.overallMatchQuality }}<br>
+          Key moments count: {{ (analysis.insights.keyMoments.length || 0) }}<br>
+          Strategic insights count: {{ (analysis.insights.strategicInsights.length || 0) }}<br>
         </div>
 
         <div class="analysis-results">
