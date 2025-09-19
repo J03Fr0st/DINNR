@@ -20,7 +20,7 @@ export class PlayerStatsComponent {
 
   // Helper method to safely cast weapon stats
   getWeaponStats(weapons: any): WeaponStats {
-    return weapons as WeaponStats;
+    return weapons || {};
   }
 
   getPerformanceColor(rating: number): string {

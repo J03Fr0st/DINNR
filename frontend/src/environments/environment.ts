@@ -1,8 +1,11 @@
 export const environment = {
   production: false,
-  // Angular runs in the browser; use file-based config and build-time replacements
-  pubgApiKey: "",
+  apiUrl: 'http://localhost:4200/api',
   apiBaseUrl: "https://api.pubg.com",
+  shard: "steam",
   cacheTtl: 3600000,
-  shard: "pc-na",
+  logging: {
+    level: 'debug',
+    enableConsole: true
+  }
 };

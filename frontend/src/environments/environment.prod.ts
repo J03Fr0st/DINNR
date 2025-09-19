@@ -1,8 +1,11 @@
 export const environment = {
   production: true,
-  // In production, set this via a build-time file replacement or runtime config
-  pubgApiKey: "",
+  apiUrl: 'https://api.dinnr.app',
   apiBaseUrl: "https://api.pubg.com",
+  shard: "steam",
   cacheTtl: 3600000,
-  shard: "pc-na",
+  logging: {
+    level: 'warn',
+    enableConsole: false
+  }
 };

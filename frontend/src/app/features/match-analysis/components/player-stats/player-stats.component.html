@@ -4,101 +4,103 @@
       <mat-card-title>Player Statistics</mat-card-title>
       <mat-card-subtitle>Detailed performance metrics for each player</mat-card-subtitle>
     </mat-card-header>
-    
+
     <mat-card-content>
       <div class="players-grid">
         <div *ngFor="let player of players" class="player-card">
-          <div class="player-header">
-            <h3>{{ player.name }}</h3>
-            <div class="performance-rating" [ngClass]="getPerformanceColor(player.insights.performanceRating)">
-              {{ getPerformanceText(player.insights.performanceRating) }}
-              <span class="rating-score">{{ player.insights.performanceRating }}/5</span>
-            </div>
-          </div>
-
-          <div class="stats-grid">
-            <div class="stat-item">
-              <span class="stat-label">K/D Ratio</span>
-              <span class="stat-value" [ngClass]="getKDColor(player.stats.kills / (player.stats.deaths || 1))">
-                {{ (player.stats.kills / (player.stats.deaths || 1)).toFixed(2) }}
-              </span>
-            </div>
-            
-            <div class="stat-item">
-              <span class="stat-label">Kills</span>
-              <span class="stat-value">{{ player.stats.kills }}</span>
-            </div>
-            
-            <div class="stat-item">
-              <span class="stat-label">Deaths</span>
-              <span class="stat-value">{{ player.stats.deaths }}</span>
-            </div>
-            
-            <div class="stat-item">
-              <span class="stat-label">Placement</span>
-              <span class="stat-value">#{{ player.stats.placement }}</span>
-            </div>
-            
-            <div class="stat-item">
-              <span class="stat-label">Damage</span>
-              <span class="stat-value">{{ Math.round(player.stats.damageDealt) }}</span>
-            </div>
-            
-            <div class="stat-item">
-              <span class="stat-label">Survival Time</span>
-              <span class="stat-value">{{ formatTime(player.stats.survivalTime) }}</span>
-            </div>
-            
-            <div class="stat-item">
-              <span class="stat-label">Distance</span>
-              <span class="stat-value">{{ formatDistance(player.stats.movement.totalDistance) }}</span>
-            </div>
-            
-            <div class="stat-item">
-              <span class="stat-label">Headshot %</span>
-              <span class="stat-value">{{ (player.stats.combat.headshotPercentage * 100).toFixed(1) }}%</span>
-            </div>
-          </div>
-
-          <div class="weapon-stats" *ngIf="Object.keys(player.stats.weapons).length > 0">
-            <h4>Weapon Usage</h4>
-            <div class="weapons-list">
-              <div *ngFor="let weapon of Object.keys(getWeaponStats(player.stats.weapons)) | keyvalue" class="weapon-item">
-                <span class="weapon-name">{{ weapon.key }}</span>
-                <span class="weapon-kills">{{ getWeaponStats(player.stats.weapons)[weapon.key].kills }} kills</span>
-                <span class="weapon-damage">{{ Math.round(getWeaponStats(player.stats.weapons)[weapon.key].damage) }} damage</span>
+          <ng-container *ngIf="player.stats">
+            <div class="player-header">
+              <h3>{{ player.name }}</h3>
+              <div class="performance-rating" [ngClass]="getPerformanceColor(player.insights.performanceRating || 0)">
+                {{ getPerformanceText(player.insights.performanceRating || 0) }}
+                <span class="rating-score">{{ player.insights.performanceRating || 0 }}/5</span>
               </div>
             </div>
-          </div>
 
-          <div class="insights-section">
-            <div class="insights-group" *ngIf="player.insights.strengths.length > 0">
-              <h4>Strengths</h4>
-              <mat-chip-set>
-                <mat-chip *ngFor="let strength of player.insights.strengths" color="primary">
-                  {{ strength }}
-                </mat-chip>
-              </mat-chip-set>
+            <div class="stats-grid">
+              <div class="stat-item">
+                <span class="stat-label">K/D Ratio</span>
+                <span class="stat-value" [ngClass]="getKDColor((player.stats.kills || 0) / (player.stats.deaths || 1))">
+                  {{ ((player.stats.kills || 0) / (player.stats.deaths || 1)).toFixed(2) }}
+                </span>
+              </div>
+
+              <div class="stat-item">
+                <span class="stat-label">Kills</span>
+                <span class="stat-value">{{ player.stats.kills || 0 }}</span>
+              </div>
+
+              <div class="stat-item">
+                <span class="stat-label">Deaths</span>
+                <span class="stat-value">{{ player.stats.deaths || 0 }}</span>
+              </div>
+
+              <div class="stat-item">
+                <span class="stat-label">Placement</span>
+                <span class="stat-value">#{{ player.stats.placement || 'N/A' }}</span>
+              </div>
+
+              <div class="stat-item">
+                <span class="stat-label">Damage</span>
+                <span class="stat-value">{{ Math.round(player.stats.damageDealt || 0) }}</span>
+              </div>
+
+              <div class="stat-item">
+                <span class="stat-label">Survival Time</span>
+                <span class="stat-value">{{ formatTime(player.stats.survivalTime || 0) }}</span>
+              </div>
+
+              <div class="stat-item">
+                <span class="stat-label">Distance</span>
+                <span class="stat-value">{{ formatDistance(player.stats.movement.totalDistance || 0) }}</span>
+              </div>
+
+              <div class="stat-item">
+                <span class="stat-label">Headshot %</span>
+                <span class="stat-value">{{ ((player.stats.combat.headshotPercentage || 0) * 100).toFixed(1) }}%</span>
+              </div>
             </div>
 
-            <div class="insights-group" *ngIf="player.insights.weaknesses.length > 0">
-              <h4>Weaknesses</h4>
-              <mat-chip-set>
-                <mat-chip *ngFor="let weakness of player.insights.weaknesses" color="warn">
-                  {{ weakness }}
-                </mat-chip>
-              </mat-chip-set>
+            <div class="weapon-stats" *ngIf="player.stats.weapons && Object.keys(player.stats.weapons).length > 0">
+              <h4>Weapon Usage</h4>
+              <div class="weapons-list">
+                <div *ngFor="let weapon of Object.keys(player.stats.weapons || {}) | keyvalue" class="weapon-item">
+                  <span class="weapon-name">{{ weapon.key }}</span>
+                  <span class="weapon-kills">{{ (player.stats.weapons[weapon.key].kills) || 0 }} kills</span>
+                  <span class="weapon-damage">{{ Math.round((player.stats.weapons[weapon.key].damage) || 0) }} damage</span>
+                </div>
+              </div>
             </div>
 
-            <div class="insights-group" *ngIf="player.insights.recommendations.length > 0">
-              <h4>Recommendations</h4>
-              <mat-chip-set>
-                <mat-chip *ngFor="let recommendation of player.insights.recommendations" color="accent">
-                  {{ recommendation }}
-                </mat-chip>
-              </mat-chip-set>
+            <div class="insights-section">
+              <div class="insights-group" *ngIf="player.insights.strengths && player.insights.strengths.length > 0">
+                <h4>Strengths</h4>
+                <mat-chip-set>
+                  <mat-chip *ngFor="let strength of player.insights.strengths" color="primary">
+                    {{ strength }}
+                  </mat-chip>
+                </mat-chip-set>
+              </div>
+
+              <div class="insights-group" *ngIf="player.insights.weaknesses && player.insights.weaknesses.length > 0">
+                <h4>Weaknesses</h4>
+                <mat-chip-set>
+                  <mat-chip *ngFor="let weakness of player.insights.weaknesses" color="warn">
+                    {{ weakness }}
+                  </mat-chip>
+                </mat-chip-set>
+              </div>
+
+              <div class="insights-group" *ngIf="player.insights.recommendations && player.insights.recommendations.length > 0">
+                <h4>Recommendations</h4>
+                <mat-chip-set>
+                  <mat-chip *ngFor="let recommendation of player.insights.recommendations" color="accent">
+                    {{ recommendation }}
+                  </mat-chip>
+                </mat-chip-set>
+              </div>
             </div>
-          </div>
+          </ng-container>
         </div>
       </div>
     </mat-card-content>

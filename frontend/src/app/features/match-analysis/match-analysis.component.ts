@@ -95,9 +95,9 @@ import { TeamComparisonComponent } from "./components/team-comparison/team-compa
 
       @if (analysisResult(); as analysis) {
         <div class="analysis-results">
-          <app-match-summary class="result-card" [summary]="analysis.matchSummary"></app-match-summary>
           <app-player-stats class="result-card" [players]="analysis.players"></app-player-stats>
           <app-insights class="result-card" [insights]="analysis.insights"></app-insights>
+          <app-match-summary class="result-card" [summary]="analysis.matchSummary"></app-match-summary>
         </div>
 
         <div class="analysis-visualizations">
@@ -217,10 +217,10 @@ import { TeamComparisonComponent } from "./components/team-comparison/team-compa
     }
 
     .analysis-results {
-      display: grid;
+      display: flex;
+      flex-direction: column;
       gap: 24px;
       margin-top: 24px;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     }
 
     .result-card {

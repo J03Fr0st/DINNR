@@ -4,24 +4,58 @@ import { Observable, forkJoin, of, throwError } from "rxjs";
 import { catchError, map, switchMap } from "rxjs/operators";
 import { environment } from "../../../environments/environment";
 import { Shard as ApiShard, type Match, MatchResponse, type Player, type TelemetryEvent } from "../models";
+import { ConfigService } from "./config.service";
+import { LoggerService } from "./logger.service";
 
 @Injectable({
   providedIn: "root",
 })
 export class PubgApiService {
-  private readonly pubgClient: PubgClient;
+  private pubgClient: PubgClient;
   private readonly cache = new Map<string, { data: unknown; timestamp: number }>();
-  private readonly cacheTtl = environment.cacheTtl;
+  private readonly logger: LoggerService;
 
-  constructor() {
-    if (!environment.pubgApiKey) {
-      console.warn("PUBG API key not configured. API calls will fail.");
+  constructor(
+    private configService: ConfigService,
+    loggerService: LoggerService
+  ) {
+    this.logger = loggerService.createLogger('PubgApiService');
+
+    // Initialize with default configuration, will be updated when config loads
+    this.pubgClient = new PubgClient({
+      apiKey: "temp-key", // Will be updated when config loads
+      shard: "steam",
+    });
+
+    // Initialize with configuration when available
+    this.configService.config$.subscribe(config => {
+      if (config) {
+        this.initializeClient(config);
+      }
+    });
+  }
+
+  private initializeClient(config: any): void {
+    // In browser environment, we need to get API key from a different source
+    // This could be from a secure backend endpoint or injected at build time
+    const apiKey = this.getApiKeyFromEnvironment();
+
+    if (!apiKey) {
+      this.logger.warn('PUBG_API_KEY environment variable not set. API calls will fail.');
     }
 
     this.pubgClient = new PubgClient({
-      apiKey: environment.pubgApiKey || "dummy-key",
-      shard: "steam",
+      apiKey: apiKey || 'dummy-key',
+      shard: config.pubgApi?.shard || 'steam',
     });
+
+    this.logger.info('PUBG API client initialized', { shard: config.pubgApi?.shard });
+  }
+
+  private getApiKeyFromEnvironment(): string {
+    // In Angular browser apps, environment variables are injected at build time
+    // Use the environment configuration directly
+    return environment.pubgApiKey || '';
   }
 
   private getCacheKey(endpoint: string, params: Record<string, unknown> = {}): string {
@@ -30,7 +64,10 @@ export class PubgApiService {
 
   private getFromCache<T>(key: string): T | null {
     const cached = this.cache.get(key);
-    if (cached && Date.now() - cached.timestamp < this.cacheTtl) {
+    const cacheConfig = this.configService.getConfigValue('cache');
+    const cacheTtl = cacheConfig?.ttl || environment.cacheTtl;
+
+    if (cached && Date.now() - cached.timestamp < cacheTtl) {
       return cached.data as T;
     }
     this.cache.delete(key);
@@ -62,7 +99,7 @@ export class PubgApiService {
           }
         })
         .catch((error) => {
-          console.error("Error fetching player:", error);
+          this.logger.error('Error fetching player', { playerName, error: error.message });
           observer.error(new Error(`Failed to fetch player '${playerName}': ${error.message}`));
         });
     });
@@ -70,7 +107,9 @@ export class PubgApiService {
 
   getMatch(matchId: string): Observable<MatchResponse> {
     // Check if API key is configured
-    if (!environment.pubgApiKey) {
+    const apiKey = this.getApiKeyFromEnvironment();
+    if (!apiKey) {
+      this.logger.warn('PUBG API key not configured for match request');
       return throwError(() => new Error(
         'PUBG API key not configured. Please set the PUBG_API_KEY environment variable to use real match data.'
       ));
@@ -110,7 +149,7 @@ export class PubgApiService {
 
   getTelemetry(telemetryUrl: string): Observable<TelemetryEvent[]> {
     // Check if API key is configured
-    if (!environment.pubgApiKey) {
+    if (!this.getApiKeyFromEnvironment()) {
       return throwError(() => new Error(
         'PUBG API key not configured. Please set the PUBG_API_KEY environment variable to use real telemetry data.'
       ));

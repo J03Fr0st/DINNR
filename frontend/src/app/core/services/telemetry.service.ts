@@ -107,6 +107,8 @@ export class TelemetryService {
     const matchSummary = this.createMatchSummary(match, telemetry, matchStartEvent, matchStartTime, matchEndTime);
     const insights = this.generateInsights(playerAnalyses, telemetry, matchSummary);
 
+    console.log("TelemetryService.processTelemetry - playerAnalyses:", playerAnalyses);
+
     return {
       matchId: match.id,
       analysisDate: new Date().toISOString(),
@@ -122,15 +124,22 @@ export class TelemetryService {
     matchStartTime: number | null,
     matchEndTime: number | null,
   ): PlayerAnalysis[] {
+    console.log("TelemetryService.analyzePlayers - Start with playerNames:", playerNames);
     return playerNames.map((playerName) => {
+      console.log("TelemetryService.analyzePlayers - Processing player:", playerName);
       const result = this.calculatePlayerDetails(telemetry, playerName, matchStartTime, matchEndTime);
-      return {
+      console.log("TelemetryService.analyzePlayers - Player calculation result:", result);
+      const insights = this.generatePlayerInsights(result.stats);
+      console.log("TelemetryService.analyzePlayers - Generated insights:", insights);
+      const playerAnalysis = {
         name: playerName,
         id: result.accountId ?? playerName,
         stats: result.stats,
-        insights: this.generatePlayerInsights(result.stats),
+        insights,
         timeline: result.timeline,
       };
+      console.log("TelemetryService.analyzePlayers - Final player analysis:", playerAnalysis);
+      return playerAnalysis;
     });
   }
 
@@ -197,9 +206,9 @@ export class TelemetryService {
             break;
           }
 
-          accountId = accountId ?? positionEvent.character.accountId ?? null;
+          accountId = accountId ?? positionEvent.character?.accountId ?? null;
 
-          if (lastPosition && lastPositionTimestamp !== null && timestamp !== null) {
+          if (lastPosition && lastPositionTimestamp !== null && timestamp !== null && positionEvent.character?.location) {
             totalDistance += this.calculateDistanceMeters(lastPosition, positionEvent.character.location);
           }
 
@@ -207,17 +216,17 @@ export class TelemetryService {
             if (inBlueZone && lastBlueZoneEntry !== null) {
               timeInBlueZone += (timestamp - lastBlueZoneEntry) / 1000;
               lastBlueZoneEntry = timestamp;
-            } else if (positionEvent.character.isInBlueZone) {
+            } else if (positionEvent.character?.isInBlueZone) {
               lastBlueZoneEntry = timestamp;
             }
           }
 
-          inBlueZone = positionEvent.character.isInBlueZone;
+          inBlueZone = positionEvent.character?.isInBlueZone ?? false;
           if (!inBlueZone) {
             lastBlueZoneEntry = null;
           }
 
-          lastPosition = positionEvent.character.location;
+          lastPosition = positionEvent.character?.location ?? lastPosition;
           lastPositionTimestamp = timestamp;
           break;
         }
