@@ -2,7 +2,7 @@ import { Component, type OnInit } from "@angular/core";
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from "@angular/forms";
 import { MatSnackBar, MatSnackBarModule } from "@angular/material/snack-bar";
 import { finalize, map, switchMap } from "rxjs/operators";
-import { Match, MatchResponse, Participant, ParticipantAttributes, type Player } from "../../../../core/models";
+import { MatchResponse, ParticipantAttributes, type Player } from "../../../../core/models";
 import { PubgApiService } from "../../../../core/services";
 import { CommonModule } from "@angular/common";
 import { MatFormFieldModule } from "@angular/material/form-field";
@@ -24,20 +24,18 @@ interface PlayerInsight {
   description: string;
 }
 
-interface PerformanceMetric {
+interface PerformanceData {
   metric: string;
-  value: string | number;
+  value: number;
+  unit?: string;
+  normalized: number;
 }
 
-interface TimelineEvent {
-  matchNumber: number;
-  matchId?: string;
-  playerName?: string;
-  kills: number;
-  rank: string | number;
-  mode: string;
-  date: string;
+interface TimelineItem {
   time: string;
+  description: string;
+  players: string[];
+  impact: number;
 }
 
 interface PlayerAnalysis {
@@ -45,8 +43,8 @@ interface PlayerAnalysis {
   region: string;
   stats: PlayerStats;
   insights: PlayerInsight[];
-  performanceData?: PerformanceMetric[];
-  timelineData?: TimelineEvent[];
+  performanceData?: PerformanceData[];
+  timelineData?: TimelineItem[];
 }
 
 @Component({
@@ -276,17 +274,17 @@ export class MatchInputComponent implements OnInit {
     }
   }
 
-  private generatePerformanceData(stats: PlayerStats): PerformanceMetric[] {
+  private generatePerformanceData(stats: PlayerStats): PerformanceData[] {
     return [
-      { metric: "Total Kills", value: stats.kills },
-      { metric: "Wins", value: stats.wins },
-      { metric: "K/D Ratio", value: stats.kdRatio.toFixed(2) },
-      { metric: "Avg Damage", value: stats.damagePerMatch.toFixed(0) },
+      { metric: "Total Kills", value: stats.kills, normalized: Math.min(stats.kills / 100, 1) },
+      { metric: "Wins", value: stats.wins, normalized: Math.min(stats.wins / 50, 1) },
+      { metric: "K/D Ratio", value: Number(stats.kdRatio.toFixed(2)), normalized: Math.min(stats.kdRatio / 3, 1) },
+      { metric: "Avg Damage", value: Number(stats.damagePerMatch.toFixed(0)), unit: " dmg", normalized: Math.min(stats.damagePerMatch / 500, 1) },
     ];
   }
 
-  private generateTimelineData(matches: MatchResponse[], playerId: string): TimelineEvent[] {
-    const timelineEvents: TimelineEvent[] = [];
+  private generateTimelineData(matches: MatchResponse[], playerId: string): TimelineItem[] {
+    const timelineEvents: TimelineItem[] = [];
 
     matches.slice(0, 10).forEach((matchResponse, index) => {
       try {
@@ -300,14 +298,24 @@ export class MatchInputComponent implements OnInit {
           const matchData = matchResponse.data?.attributes;
           const createdAtIso = matchData?.createdAt || null;
           const createdDate = createdAtIso ? new Date(createdAtIso) : null;
+          const time = createdDate ? createdDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "—";
+
+          const kills = stats.kills || 0;
+          const rank = stats.winPlace ?? 0;
+          const mode = matchData?.gameMode || "Unknown";
+
+          // Generate impact score based on performance
+          let impact = 1;
+          if (rank === 1) impact = 5;
+          else if (rank <= 5) impact = 4;
+          else if (kills >= 5) impact = 3;
+          else if (kills >= 2) impact = 2;
 
           timelineEvents.push({
-            matchNumber: index + 1,
-            kills: stats.kills || 0,
-            rank: stats.winPlace ?? "N/A",
-            mode: matchData?.gameMode || "Unknown",
-            date: createdDate ? createdDate.toLocaleDateString() : "—",
-            time: createdDate ? createdDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "—",
+            time: time,
+            description: `Match #${index + 1}: ${kills} kills, ranked #${rank} in ${mode}`,
+            players: ["Player"], // Could be enhanced with teammate data if available
+            impact: impact,
           });
         }
       } catch (error) {

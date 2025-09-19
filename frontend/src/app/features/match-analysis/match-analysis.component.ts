@@ -87,6 +87,11 @@ import { TeamComparisonComponent } from "./components/team-comparison/team-compa
                 <i class="fas fa-redo"></i>
                 Clear
               </button>
+
+              <!-- Debug information -->
+              <div style="margin-top: 10px; font-size: 12px; color: #666;">
+                Debug: Form Valid: {{ isFormValid() }}, Loading: {{ isLoading() }}, Button Disabled: {{ !isFormValid() || isLoading() }}
+              </div>
             </div>
           </form>
         </mat-card-content>
@@ -387,7 +392,7 @@ export class MatchAnalysisComponent implements OnInit {
   heatmapCells = signal<HeatmapCell[]>([]);
   weaponUsage = signal<WeaponUsageItem[]>([]);
 
-  
+
   ngOnInit(): void {
     // Initialize form after component initialization
     this.initializeFormOptimizations();
@@ -396,23 +401,40 @@ export class MatchAnalysisComponent implements OnInit {
 
     // Handle form initialization from route params
     const paramsSubscription = this.route.queryParams.subscribe(params => {
+      console.log('MatchAnalysisComponent: Route params received:', params);
+
       if (params["matchId"]) {
+        console.log('MatchAnalysisComponent: Setting matchId:', params["matchId"]);
         form.patchValue({
           matchId: params["matchId"],
         });
       }
       if (params["players"]) {
         const players = Array.isArray(params["players"]) ? params["players"].join(", ") : params["players"];
+        console.log('MatchAnalysisComponent: Setting players:', players);
         form.patchValue({
           playerNames: players,
         });
       }
       if (params["playerNames"]) {
         const playerNames = Array.isArray(params["playerNames"]) ? params["playerNames"].join(", ") : params["playerNames"];
+        console.log('MatchAnalysisComponent: Setting playerNames:', playerNames);
         form.patchValue({
           playerNames: playerNames,
         });
       }
+
+      // Update form validity after patching values
+      setTimeout(() => {
+        this.isFormValid.set(form.valid);
+        console.log('MatchAnalysisComponent: Form validity after patch:', {
+          isValid: form.valid,
+          formValues: form.value,
+          formErrors: form.errors,
+          matchIdErrors: form.get('matchId')?.errors,
+          playerNamesErrors: form.get('playerNames')?.errors
+        });
+      });
     });
 
     // Update form validity signal using a subscription to form status changes
@@ -446,7 +468,12 @@ export class MatchAnalysisComponent implements OnInit {
   }
 
   onSubmit(): void {
+    console.log('MatchAnalysisComponent: onSubmit called');
+    console.log('MatchAnalysisComponent: Form valid?', this.isFormValid());
+    console.log('MatchAnalysisComponent: Form value:', this.matchForm().value);
+
     if (!this.isFormValid()) {
+      console.log('MatchAnalysisComponent: Form is invalid, aborting submit');
       return;
     }
 
@@ -454,11 +481,15 @@ export class MatchAnalysisComponent implements OnInit {
     const matchId = (formValue["matchId"] ?? "").trim();
     const players = this.parsePlayerNames(formValue["playerNames"] ?? "");
 
+    console.log('MatchAnalysisComponent: Parsed values:', { matchId, players });
+
     if (!matchId || players.length === 0) {
+      console.log('MatchAnalysisComponent: Missing matchId or players');
       this.errorMessage.set("Provide a match ID and at least one player name");
       return;
     }
 
+    console.log('MatchAnalysisComponent: Starting analysis...');
     this.isLoading.set(true);
     this.errorMessage.set(null);
 
@@ -467,10 +498,12 @@ export class MatchAnalysisComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (analysis) => {
+          console.log('MatchAnalysisComponent: Analysis completed:', analysis);
           this.analysisResult.set(analysis);
           this.isLoading.set(false);
         },
         error: (error: unknown) => {
+          console.error('MatchAnalysisComponent: Analysis error:', error);
           const message = error instanceof Error ? error.message : "Failed to analyze match";
           this.errorMessage.set(message);
           this.isLoading.set(false);
