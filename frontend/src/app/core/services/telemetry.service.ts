@@ -106,6 +106,7 @@ export class TelemetryService {
     const playerAnalyses = this.analyzePlayers(telemetry, playerNames, matchStartTime, matchEndTime);
     const matchSummary = this.createMatchSummary(match, telemetry, matchStartEvent, matchStartTime, matchEndTime);
     const insights = this.generateInsights(playerAnalyses, telemetry, matchSummary);
+    console.log("TelemetryService.processTelemetry - generated insights:", insights);
 
     console.log("TelemetryService.processTelemetry - playerAnalyses:", playerAnalyses);
 
@@ -616,6 +617,11 @@ export class TelemetryService {
     telemetry: TelemetryEvent[],
     matchSummary: MatchSummary,
   ): AnalysisInsights {
+    console.log('TelemetryService.generateInsights - starting with:', {
+      playerAnalysesCount: playerAnalyses.length,
+      telemetryEventsCount: telemetry.length,
+      matchSummary: matchSummary
+    });
     const playerCount = playerAnalyses.length || 1;
     const avgRating =
       playerAnalyses.reduce((sum, player) => sum + player.insights.performanceRating, 0) / playerCount;
@@ -631,12 +637,15 @@ export class TelemetryService {
       overallRating: avgRating,
     };
 
-    return {
+    const finalInsights = {
       overallMatchQuality: avgRating,
       keyMoments: this.extractKeyMoments(telemetry),
       teamPerformance,
       strategicInsights: this.generateStrategicInsights(playerAnalyses),
     };
+
+    console.log('TelemetryService.generateInsights - final insights:', finalInsights);
+    return finalInsights;
   }
 
   private generatePlayerInsights(stats: PlayerMatchStats): PlayerInsights {

@@ -107,6 +107,17 @@ import { TeamComparisonComponent } from "./components/team-comparison/team-compa
       }
 
       @if (analysisResult(); as analysis) {
+        <!-- Debug information for insights -->
+        <div style="background: #f0f0f0; padding: 10px; margin: 10px 0; font-size: 12px; border-radius: 4px;">
+          <strong>Debug Analysis Data:</strong><br>
+          Has insights: {{ !!analysis.insights }}<br>
+          Insights type: {{ typeof analysis.insights }}<br>
+          Insights keys: {{ analysis.insights ? Object.keys(analysis.insights).join(', ') : 'No insights' }}<br>
+          Overall quality: {{ analysis.insights?.overallMatchQuality }}<br>
+          Key moments count: {{ analysis.insights?.keyMoments?.length || 0 }}<br>
+          Strategic insights count: {{ analysis.insights?.strategicInsights?.length || 0 }}<br>
+        </div>
+
         <div class="analysis-results">
           <app-player-stats class="result-card" [players]="analysis.players"></app-player-stats>
           <app-insights class="result-card" [insights]="analysis.insights"></app-insights>
@@ -392,6 +403,8 @@ export class MatchAnalysisComponent implements OnInit {
   heatmapCells = signal<HeatmapCell[]>([]);
   weaponUsage = signal<WeaponUsageItem[]>([]);
 
+  // Make utility objects available to the template
+  Object = Object;
 
   ngOnInit(): void {
     // Initialize form after component initialization

@@ -1,4 +1,4 @@
-import { Component, input } from "@angular/core";
+import { Component, input, OnInit, OnChanges } from "@angular/core";
 import type { AnalysisInsights } from "../../../../core/models/index";
 import { MatCardModule } from "@angular/material/card";
 import { MatChipsModule } from "@angular/material/chips";
@@ -14,8 +14,20 @@ import { CUSTOM_ELEMENTS_SCHEMA } from "@angular/core";
   imports: [CommonModule, MatCardModule, MatChipsModule, MatIconModule],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
-export class InsightsComponent {
+export class InsightsComponent implements OnInit, OnChanges {
   insights = input<AnalysisInsights | null>(null);
+
+  constructor() {
+    console.log('InsightsComponent: Component created');
+  }
+
+  ngOnInit() {
+    console.log('InsightsComponent: OnInit, insights:', this.insights());
+  }
+
+  ngOnChanges() {
+    console.log('InsightsComponent: OnChanges, insights:', this.insights());
+  }
 
   getOverallQualityColor(rating: number): string {
     if (rating >= 4) return "excellent";

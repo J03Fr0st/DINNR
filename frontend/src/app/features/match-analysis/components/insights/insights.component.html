@@ -5,6 +5,13 @@
       <mat-card-subtitle>AI-powered analysis and recommendations</mat-card-subtitle>
     </mat-card-header>
 
+    <!-- Debug information for insights component -->
+    <div style="background: #e0e0e0; padding: 8px; margin: 8px 0; font-size: 11px; border-radius: 3px;">
+      <strong>Insights Component Debug:</strong><br>
+      Has insights: {{ !!insights() }}<br>
+      Insights value: {{ insights() | json }}<br>
+    </div>
+
     <mat-card-content *ngIf="insights()">
       <div class="overall-quality">
         <h3>Overall Match Quality</h3>
@@ -74,11 +81,11 @@
               <div class="moment-time">{{ formatTime(moment.timestamp) }}</div>
               <div class="moment-description">{{ moment.description }}</div>
               <div class="moment-players">
-                <mat-chip-list>
-                  <mat-chip *ngFor="let player of moment.players" size="small">
+                <div class="player-chips">
+                  <mat-chip *ngFor="let player of moment.players">
                     {{ player }}
                   </mat-chip>
-                </mat-chip-list>
+                </div>
               </div>
             </div>
             <div class="moment-impact">
