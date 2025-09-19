@@ -23,7 +23,7 @@ DINNR is a single-page application built with Angular that integrates with the P
 ## 3. Technology Stack
 
 ### 3.1 Frontend
-- **Framework**: Angular 17+ with standalone components
+- **Framework**: Angular 20+ with standalone components
 - **Language**: TypeScript 5.x
 - **State Management**: RxJS + Signals
 - **UI Framework**: Angular Material
@@ -246,9 +246,9 @@ Raw Telemetry → Event Processing → Data Aggregation → Visualization → Us
 - Mock data for development
 
 ### 12.2 Testing
-- Unit tests with Jasmine/Karma
+- Unit tests with Jest
 - Integration tests
-- End-to-end tests with Cypress
+- End-to-end tests with Playwright
 
 ### 12.3 CI/CD
 - GitHub Actions or similar

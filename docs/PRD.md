@@ -52,10 +52,11 @@ To become the go-to analytics platform for PUBG players seeking to improve their
 ## 5. Technical Requirements
 
 ### 5.1 Frontend
-- **Framework**: Angular 17+
+- **Framework**: Angular 20+
 - **Language**: TypeScript
-- **Styling**: Modern CSS framework (Tailwind/Bootstrap)
-- **Charts**: Chart.js or similar for data visualization
+- **Styling**: SCSS with Angular Material
+- **Charts**: Chart.js for data visualization
+- **Testing**: Jest for unit testing
 
 ### 5.2 API Integration
 - **Primary Package**: @j03fr0st/pubg-ts for PUBG API integration

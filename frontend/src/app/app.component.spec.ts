@@ -5,8 +5,7 @@ import { AppComponent } from "./app.component";
 describe("AppComponent", () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [RouterTestingModule],
-      declarations: [AppComponent],
+      imports: [RouterTestingModule, AppComponent],
     }).compileComponents();
   });
 
@@ -19,13 +18,13 @@ describe("AppComponent", () => {
   it(`should have as title 'dinnr-app'`, () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.title).toEqual("dinnr-app");
+    expect(app.title()).toEqual("dinnr-app");
   });
 
-  it("should render title", () => {
+  it("should render DINNR title", () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector("h1")?.textContent).toContain("Hello, dinnr-app");
+    expect(compiled.querySelector("h1")?.textContent).toContain("DINNR");
   });
 });

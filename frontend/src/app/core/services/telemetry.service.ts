@@ -2,6 +2,7 @@ import { Injectable } from "@angular/core";
 import { type Observable, throwError, of } from "rxjs";
 import { catchError, map, switchMap } from "rxjs/operators";
 import { environment } from "../../../environments/environment";
+import { assetManager } from "@j03fr0st/pubg-ts";
 import {
   type LogGameStatePeriodic,
   type LogHeal,
@@ -252,7 +253,7 @@ export class TelemetryService {
               details: {
                 killer: killEvent.killer.name,
                 victim: killEvent.victim?.name || "Unknown",
-                weapon: killEvent.damageCauserName,
+                weapon: this.getHumanReadableWeaponName(killEvent.damageCauserName),
                 distance,
               },
             });
@@ -270,7 +271,7 @@ export class TelemetryService {
               details: {
                 killer: killEvent.killer?.name || "Unknown",
                 victim: killEvent.victim.name,
-                weapon: killEvent.damageCauserName,
+                weapon: this.getHumanReadableWeaponName(killEvent.damageCauserName),
                 distance: this.toMeters(killEvent.distance),
               },
             });
@@ -304,7 +305,7 @@ export class TelemetryService {
               details: {
                 killer: killEvent.killer.name,
                 victim: killEvent.victim?.name || "Unknown",
-                weapon: killEvent.damageCauserName,
+                weapon: this.getHumanReadableWeaponName(killEvent.damageCauserName),
                 distance,
               },
             });
@@ -322,7 +323,7 @@ export class TelemetryService {
               details: {
                 killer: killEvent.killer?.name || "Unknown",
                 victim: killEvent.victim.name,
-                weapon: killEvent.damageCauserName,
+                weapon: this.getHumanReadableWeaponName(killEvent.damageCauserName),
                 distance: this.toMeters(killEvent.distance),
               },
             });
@@ -802,10 +803,41 @@ export class TelemetryService {
     return stats[key];
   }
 
+  private getHumanReadableWeaponName(weaponId: string): string {
+    if (!weaponId) {
+      return weaponId; // Return null, undefined, or empty string as-is
+    }
+
+    // Try the most relevant methods for weapon-related IDs in order of likelihood
+    const damageCauserName = assetManager.getDamageCauserName(weaponId);
+    if (damageCauserName != weaponId) {
+      return damageCauserName;
+    }
+
+    const itemName = assetManager.getItemName(weaponId);
+    if (itemName != weaponId) {
+      return itemName;
+    }
+
+    const vehicleName = assetManager.getVehicleName(weaponId);
+    if (vehicleName != weaponId) {
+      return vehicleName;
+    }
+
+    const gameModeName = assetManager.getGameModeName(weaponId);
+    if (gameModeName != weaponId) {
+      return gameModeName;
+    }
+
+    // Fallback to original ID if not found in any collection
+    return weaponId;
+  }
+
   private buildWeaponStats(aggregations: Record<string, WeaponAggregation>): WeaponStats {
     const result: WeaponStats = {};
     for (const [weapon, value] of Object.entries(aggregations)) {
-      result[weapon] = {
+      const readableName = this.getHumanReadableWeaponName(weapon);
+      result[readableName] = {
         kills: value.kills,
         damage: value.damage,
         hits: value.hits,

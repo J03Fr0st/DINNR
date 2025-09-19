@@ -261,7 +261,7 @@ getKDColor(kd: number): string // Returns K/D ratio color
 ## 6. Component Patterns
 
 ### 6.1 Standalone Components
-All components follow Angular 17+ standalone component pattern:
+All components follow Angular 20+ standalone component pattern:
 ```typescript
 @Component({
   selector: 'app-component-name',
@@ -321,7 +321,7 @@ constructor(
 
 ### 8.1 Unit Testing
 - Each component has corresponding `.spec.ts` file
-- Uses Jasmine testing framework
+- Uses Jest testing framework
 - Tests component behavior and rendering
 - Mocks dependencies appropriately
 

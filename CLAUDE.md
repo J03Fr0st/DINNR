@@ -22,6 +22,9 @@ DINNR is a PUBG analytics platform that transforms raw telemetry data into clear
 - rxjs: Reactive programming and state management
 - chart.js: Data visualization and charts
 - lodash: Utility functions
+- Jest: JavaScript testing framework
+- jest-preset-angular: Angular Jest preset
+- @playwright/test: End-to-end testing framework
 
 ## Project Structure
 
@@ -67,6 +70,9 @@ npm run build:local          # Local development build
 ### Testing
 ```bash
 npm test                     # Unit tests
+npm run e2e                  # End-to-end tests
+npm run e2e:ui              # End-to-end tests with UI mode
+npm run e2e:headed           # End-to-end tests with headed browser
 ```
 
 ### Development
@@ -146,7 +152,7 @@ ng generate component name   # Generate new component
 - Feature-based module organization
 - Smart/dumb component pattern
 - Reusable shared components
-- Standalone components (Angular 17+)
+- Standalone components (Angular 20+)
 
 ### State Management
 - RxJS for reactive data streams
@@ -232,8 +238,9 @@ PUBG_API_KEY=your_api_key_here
 
 ### Unit Tests
 - Test all services and components
-- Use Jasmine/Karma framework
+- Use Jest testing framework
 - Mock external dependencies
+- Coverage reporting with Jest
 
 ### Integration Tests
 - Test component interactions
@@ -243,4 +250,6 @@ PUBG_API_KEY=your_api_key_here
 ### End-to-End Tests
 - Test user workflows
 - Verify critical paths
-- Use Cypress for testing
+- Use Playwright for browser automation and testing
+- Cross-browser testing capabilities
+- Accessibility testing with automated WCAG compliance
