@@ -1,4 +1,3 @@
-import type { Match, Participant, Player } from "@j03fr0st/pubg-ts";
 
 export interface MatchAnalysis {
   matchId: string;

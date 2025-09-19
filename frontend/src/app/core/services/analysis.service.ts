@@ -1,9 +1,9 @@
 import { Injectable } from "@angular/core";
-import { type Observable, forkJoin, of, throwError } from "rxjs";
-import { catchError, map, switchMap } from "rxjs/operators";
-import type { Shard as ApiShard, Match, MatchResponse, ParticipantAttributes, Player } from "../models";
-import { type MatchAnalysis, PlayerAnalysis, PlayerInsights, PlayerMatchStats } from "../models/analysis.models";
-import { type MatchAnalysisForm, type PlayerSearchForm, Shard as UiShard } from "../models/ui.models";
+import { type Observable, forkJoin, throwError } from "rxjs";
+import { map, switchMap } from "rxjs/operators";
+import type { MatchResponse, ParticipantAttributes, Player } from "../models";
+import { type MatchAnalysis } from "../models/analysis.models";
+import { type MatchAnalysisForm, type PlayerSearchForm } from "../models/ui.models";
 import { PubgApiService } from "./pubg-api.service";
 import { TelemetryService } from "./telemetry.service";
 
@@ -81,7 +81,7 @@ export class AnalysisService {
       );
   }
 
-  getPlayerHistory(playerName: string, shard: ApiShard = "pc-na" as ApiShard): Observable<MatchHistory[]> {
+  getPlayerHistory(playerName: string): Observable<MatchHistory[]> {
     return this.getPlayerStats(playerName).pipe(
       map((stats) =>
         stats.recentMatches.map((match) => ({

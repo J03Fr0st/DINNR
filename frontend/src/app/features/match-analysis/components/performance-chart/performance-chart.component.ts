@@ -1,4 +1,4 @@
-import { Component, Input } from "@angular/core";
+import { Component, input } from "@angular/core";
 import { CommonModule } from "@angular/common";
 
 interface PerformanceData {
@@ -15,7 +15,7 @@ interface PerformanceData {
       <div class="chart-container">
         <h3>Team Performance Snapshot</h3>
         <div class="metrics">
-          <div *ngFor="let metric of performanceData" class="metric">
+          <div *ngFor="let metric of performanceData()" class="metric">
             <div class="metric-header">
               <span class="metric-name">{{ metric.metric }}</span>
               <span class="metric-value">{{ metric.value | number:'1.0-0' }}{{ metric.unit ?? '' }}</span>
@@ -87,10 +87,10 @@ interface PerformanceData {
   imports: [CommonModule],
 })
 export class PerformanceChartComponent {
-  @Input() performanceData: PerformanceData[] = [];
+  performanceData = input<PerformanceData[]>([]);
 
   get hasData(): boolean {
-    return this.performanceData.length > 0;
+    return this.performanceData().length > 0;
   }
 
   getWidth(normalized: number): number {

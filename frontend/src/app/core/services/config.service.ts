@@ -1,4 +1,4 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable, OnDestroy, inject } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
@@ -28,6 +28,7 @@ export interface AppConfig {
   providedIn: 'root'
 })
 export class ConfigService implements OnDestroy {
+  private http = inject(HttpClient);
   private configSubject = new BehaviorSubject<AppConfig | null>(null);
   private readonly STORAGE_KEY = 'dinnr_config';
   private readonly CONFIG_REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
@@ -36,7 +37,7 @@ export class ConfigService implements OnDestroy {
   public config$ = this.configSubject.asObservable();
   public configLoaded$ = this.configSubject.pipe(map(config => config !== null));
 
-  constructor(private http: HttpClient) {
+  constructor() {
     this.loadConfig();
     this.startPeriodicRefresh();
   }

@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, SimpleChanges } from "@angular/core";
+import { Component, input, effect } from "@angular/core";
 import { CommonModule } from "@angular/common";
 
 interface ComparisonDatum {
@@ -26,7 +26,7 @@ interface ComparisonDatum {
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let row of comparisonData">
+            <tr *ngFor="let row of comparisonData()">
               <td class="player-name">{{ row.player }}</td>
               <td>
                 <div class="bar">
@@ -118,8 +118,8 @@ interface ComparisonDatum {
   standalone: true,
   imports: [CommonModule],
 })
-export class TeamComparisonComponent implements OnChanges {
-  @Input() comparisonData: ComparisonDatum[] = [];
+export class TeamComparisonComponent {
+  comparisonData = input<ComparisonDatum[]>([]);
 
   private maxValues = {
     kills: 1,
@@ -127,12 +127,15 @@ export class TeamComparisonComponent implements OnChanges {
     survival: 1,
   };
 
-  ngOnChanges(_changes: SimpleChanges): void {
-    this.maxValues = {
-      kills: this.getMax("kills"),
-      damage: this.getMax("damage"),
-      survival: this.getMax("survivalTime"),
-    };
+  constructor() {
+    effect(() => {
+      const data = this.comparisonData();
+      this.maxValues = {
+        kills: this.getMax(data, "kills"),
+        damage: this.getMax(data, "damage"),
+        survival: this.getMax(data, "survivalTime"),
+      };
+    });
   }
 
   getRatio(value: number, key: "kills" | "damage" | "survival"): number {
@@ -140,7 +143,7 @@ export class TeamComparisonComponent implements OnChanges {
     return Math.max(Math.min((value / max) * 100, 100), 8);
   }
 
-  private getMax(prop: "kills" | "damage" | "survivalTime"): number {
-    return this.comparisonData.reduce((max, item) => Math.max(max, item[prop]), 1);
+  private getMax(data: ComparisonDatum[], prop: "kills" | "damage" | "survivalTime"): number {
+    return data.reduce((max, item) => Math.max(max, item[prop]), 1);
   }
 }

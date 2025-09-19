@@ -1,4 +1,4 @@
-import { Component, Input } from "@angular/core";
+import { Component, input } from "@angular/core";
 import type { MatchSummary } from "../../../../core/models/index";
 import { CommonModule } from "@angular/common";
 import { MatCardModule } from "@angular/material/card";
@@ -12,7 +12,7 @@ import { MatIconModule } from "@angular/material/icon";
   imports: [CommonModule, MatCardModule, MatIconModule],
 })
 export class MatchSummaryComponent {
-  @Input() summary: MatchSummary | null = null;
+  summary = input<MatchSummary | null>(null);
 
   formatTime(seconds: number): string {
     const minutes = Math.floor(seconds / 60);

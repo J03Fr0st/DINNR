@@ -7,7 +7,7 @@
 
     <mat-card-content>
       <div class="players-grid">
-        <div *ngFor="let player of players" class="player-card">
+        <div *ngFor="let player of players()" class="player-card">
           <ng-container *ngIf="player.stats">
             <div class="player-header">
               <h3>{{ player.name }}</h3>

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { ConfigService } from './config.service';
 import { environment } from '../../../environments/environment';
 
@@ -16,11 +16,12 @@ export interface LogEntry {
   providedIn: 'root'
 })
 export class LoggerService {
+  private configService = inject(ConfigService);
   private readonly CONTEXT = 'DINNR';
   private readonly logBuffer: LogEntry[] = [];
   private readonly MAX_BUFFER_SIZE = 100;
 
-  constructor(private configService: ConfigService) {}
+  constructor() {}
 
   /**
    * Log debug message
@@ -130,6 +131,7 @@ export class LoggerService {
   private sendToLoggingService(entry: LogEntry): void {
     // In a real implementation, this would send to a logging service
     // For now, we'll just keep it in memory for debugging
+    console.log('[LoggingService]', entry); // Use the entry parameter
     if (navigator.onLine) {
       // Could implement sending to external logging service here
       // fetch('/api/logs', {

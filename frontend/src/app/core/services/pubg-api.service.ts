@@ -1,9 +1,8 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { PubgClient } from "@j03fr0st/pubg-ts";
-import { Observable, forkJoin, of, throwError } from "rxjs";
-import { catchError, map, switchMap } from "rxjs/operators";
+import { Observable, of, throwError } from "rxjs";
 import { environment } from "../../../environments/environment";
-import { Shard as ApiShard, type Match, MatchResponse, type Player, type TelemetryEvent } from "../models";
+import { type MatchResponse, type Player, type TelemetryEvent } from "../models";
 import { ConfigService } from "./config.service";
 import { LoggerService } from "./logger.service";
 
@@ -11,15 +10,14 @@ import { LoggerService } from "./logger.service";
   providedIn: "root",
 })
 export class PubgApiService {
+  private configService = inject(ConfigService);
+  private loggerService = inject(LoggerService);
   private pubgClient: PubgClient;
   private readonly cache = new Map<string, { data: unknown; timestamp: number }>();
   private readonly logger: LoggerService;
 
-  constructor(
-    private configService: ConfigService,
-    loggerService: LoggerService
-  ) {
-    this.logger = loggerService.createLogger('PubgApiService');
+  constructor() {
+    this.logger = this.loggerService.createLogger('PubgApiService');
 
     // Initialize with default configuration, will be updated when config loads
     this.pubgClient = new PubgClient({

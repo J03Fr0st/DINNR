@@ -1,5 +1,5 @@
 import { Component, signal, computed } from "@angular/core";
-import { RouterModule, type Router } from "@angular/router";
+import { RouterModule } from "@angular/router";
 import { MatIconModule } from "@angular/material/icon";
 
 @Component({

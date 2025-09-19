@@ -5,16 +5,16 @@
       <mat-card-subtitle>AI-powered analysis and recommendations</mat-card-subtitle>
     </mat-card-header>
 
-    <mat-card-content *ngIf="insights">
+    <mat-card-content *ngIf="insights()">
       <div class="overall-quality">
         <h3>Overall Match Quality</h3>
         <div class="quality-meter">
           <div class="quality-bar">
-            <div class="quality-fill" [ngClass]="getOverallQualityColor(insights.overallMatchQuality)"
-                 [style.width.%]="insights.overallMatchQuality * 20">
+            <div class="quality-fill" [ngClass]="getOverallQualityColor(insights()?.overallMatchQuality ?? 0)"
+                 [style.width.%]="(insights()?.overallMatchQuality ?? 0) * 20">
             </div>
           </div>
-          <div class="quality-text">{{ getOverallQualityText(insights.overallMatchQuality) }}</div>
+          <div class="quality-text">{{ getOverallQualityText(insights()?.overallMatchQuality ?? 0) }}</div>
         </div>
       </div>
 
@@ -24,49 +24,49 @@
           <div class="performance-item">
             <div class="performance-label">Coordination</div>
             <div class="performance-bar">
-              <div class="performance-fill" [ngClass]="getTeamPerformanceColor(insights.teamPerformance.coordination)"
-                   [style.width.%]="insights.teamPerformance.coordination * 20">
+              <div class="performance-fill" [ngClass]="getTeamPerformanceColor(insights()?.teamPerformance?.coordination ?? 0)"
+                   [style.width.%]="(insights()?.teamPerformance?.coordination ?? 0) * 20">
               </div>
             </div>
-            <div class="performance-value">{{ insights.teamPerformance.coordination }}/5</div>
+            <div class="performance-value">{{ insights()?.teamPerformance?.coordination ?? 0 }}/5</div>
           </div>
 
           <div class="performance-item">
             <div class="performance-label">Communication</div>
             <div class="performance-bar">
-              <div class="performance-fill" [ngClass]="getTeamPerformanceColor(insights.teamPerformance.communication)"
-                   [style.width.%]="insights.teamPerformance.communication * 20">
+              <div class="performance-fill" [ngClass]="getTeamPerformanceColor(insights()?.teamPerformance?.communication ?? 0)"
+                   [style.width.%]="(insights()?.teamPerformance?.communication ?? 0) * 20">
               </div>
             </div>
-            <div class="performance-value">{{ insights.teamPerformance.communication }}/5</div>
+            <div class="performance-value">{{ insights()?.teamPerformance?.communication ?? 0 }}/5</div>
           </div>
 
           <div class="performance-item">
             <div class="performance-label">Strategy</div>
             <div class="performance-bar">
-              <div class="performance-fill" [ngClass]="getTeamPerformanceColor(insights.teamPerformance.strategy)"
-                   [style.width.%]="insights.teamPerformance.strategy * 20">
+              <div class="performance-fill" [ngClass]="getTeamPerformanceColor(insights()?.teamPerformance?.strategy ?? 0)"
+                   [style.width.%]="(insights()?.teamPerformance?.strategy ?? 0) * 20">
               </div>
             </div>
-            <div class="performance-value">{{ insights.teamPerformance.strategy }}/5</div>
+            <div class="performance-value">{{ insights()?.teamPerformance?.strategy ?? 0 }}/5</div>
           </div>
 
           <div class="performance-item">
             <div class="performance-label">Overall</div>
             <div class="performance-bar">
-              <div class="performance-fill" [ngClass]="getTeamPerformanceColor(insights.teamPerformance.overallRating || 0)"
-                   [style.width.%]="(insights.teamPerformance.overallRating || 0) * 20">
+              <div class="performance-fill" [ngClass]="getTeamPerformanceColor(insights()?.teamPerformance?.overallRating ?? 0)"
+                   [style.width.%]="(insights()?.teamPerformance?.overallRating ?? 0) * 20">
               </div>
             </div>
-            <div class="performance-value">{{ insights.teamPerformance.overallRating || 0 }}/5</div>
+            <div class="performance-value">{{ insights()?.teamPerformance?.overallRating ?? 0 }}/5</div>
           </div>
         </div>
       </div>
 
-      <div class="key-moments" *ngIf="insights.keyMoments && insights.keyMoments.length > 0">
+      <div class="key-moments" *ngIf="insights()?.keyMoments && (insights()?.keyMoments?.length ?? 0) > 0">
         <h3>Key Moments</h3>
         <div class="moments-timeline">
-          <div *ngFor="let moment of insights.keyMoments" class="moment-item">
+          <div *ngFor="let moment of insights()?.keyMoments" class="moment-item">
             <div class="moment-icon" [ngClass]="getMomentColor(moment.type)">
               <mat-icon>{{ getMomentIcon(moment.type) }}</mat-icon>
             </div>
@@ -91,10 +91,10 @@
         </div>
       </div>
 
-      <div class="strategic-insights" *ngIf="insights.strategicInsights && insights.strategicInsights.length > 0">
+      <div class="strategic-insights" *ngIf="insights()?.strategicInsights && (insights()?.strategicInsights?.length ?? 0) > 0">
         <h3>Strategic Insights</h3>
         <div class="insights-list">
-          <div *ngFor="let insight of insights.strategicInsights" class="insight-item">
+          <div *ngFor="let insight of insights()?.strategicInsights" class="insight-item">
             <mat-icon class="insight-icon">lightbulb</mat-icon>
             <div class="insight-text">{{ insight }}</div>
           </div>
@@ -102,7 +102,7 @@
       </div>
     </mat-card-content>
 
-    <mat-card-content *ngIf="!insights">
+    <mat-card-content *ngIf="!insights()">
       <div class="no-data">
         <mat-icon>psychology</mat-icon>
         <p>No insights available</p>

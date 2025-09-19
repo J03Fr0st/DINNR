@@ -1,7 +1,6 @@
-import { Injectable } from "@angular/core";
-import { type Observable, throwError, of } from "rxjs";
-import { catchError, map, switchMap } from "rxjs/operators";
-import { environment } from "../../../environments/environment";
+import { Injectable, inject } from "@angular/core";
+import { type Observable, throwError } from "rxjs";
+import { map, switchMap, catchError } from "rxjs/operators";
 import { assetManager } from "@j03fr0st/pubg-ts";
 import {
   type LogGameStatePeriodic,
@@ -63,14 +62,14 @@ const HEAL_ITEM_DURATIONS: Record<string, number> = {
   providedIn: "root",
 })
 export class TelemetryService {
-  constructor(private pubgApiService: PubgApiService) {}
+  private pubgApiService = inject(PubgApiService);
 
   analyzeMatch(matchId: string, playerNames: string[]): Observable<MatchAnalysis> {
     return this.pubgApiService.getMatch(matchId).pipe(
       switchMap((matchResponse) =>
         this.pubgApiService.getTelemetry(this.extractTelemetryUrl(matchResponse)).pipe(
           map((telemetry) => this.processTelemetry(telemetry, playerNames, matchResponse.data)),
-          catchError((error) => {
+          catchError((error: any) => {
             console.error("Error processing telemetry:", error);
             return throwError(() => new Error(`Failed to analyze match: ${error.message}`));
           }),

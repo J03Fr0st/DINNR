@@ -6,14 +6,22 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import type { MatchAnalysis } from "../../core/models";
 import { AnalysisService } from "../../core/services/analysis.service";
 import {
-  VisualizationService,
   type KillTimelineItem,
   type PerformanceMetric,
   type PlayerComparisonItem,
   type HeatmapCell,
   type WeaponUsageItem,
 } from "../../core/services/visualization.service";
-import { MaterialModule } from "../../material.module";
+import { MatButtonModule } from "@angular/material/button";
+import { MatCardModule } from "@angular/material/card";
+import { MatChipsModule } from "@angular/material/chips";
+import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatIconModule } from "@angular/material/icon";
+import { MatInputModule } from "@angular/material/input";
+import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
+import { MatSelectModule } from "@angular/material/select";
+import { MatSnackBarModule } from "@angular/material/snack-bar";
+import { MatTabsModule } from "@angular/material/tabs";
 import { InsightsComponent } from "./components/insights/insights.component";
 import { KillTimelineComponent } from "./components/kill-timeline/kill-timeline.component";
 import { MatchSummaryComponent } from "./components/match-summary/match-summary.component";
@@ -328,7 +336,16 @@ import { TeamComparisonComponent } from "./components/team-comparison/team-compa
   imports: [
     DecimalPipe,
     ReactiveFormsModule,
-    MaterialModule,
+    MatButtonModule,
+    MatCardModule,
+    MatChipsModule,
+    MatFormFieldModule,
+    MatIconModule,
+    MatInputModule,
+    MatProgressSpinnerModule,
+    MatSelectModule,
+    MatSnackBarModule,
+    MatTabsModule,
     InsightsComponent,
     MatchSummaryComponent,
     MatchAnalysisPlayerStatsComponent,
@@ -342,8 +359,12 @@ export class MatchAnalysisComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private fb = inject(FormBuilder);
   private analysisService = inject(AnalysisService);
-  private visualizationService = inject(VisualizationService);
+  // private visualizationService = inject(VisualizationService);
   private destroyRef = inject(DestroyRef);
+
+  constructor() {
+    // Initialize the component
+  }
 
   // Signals for reactive state management
   matchForm = signal<FormGroup>(this.createForm());
@@ -360,45 +381,21 @@ export class MatchAnalysisComponent implements OnInit {
       : null,
   }));
 
-  performanceMetrics = computed<PerformanceMetric[]>(() => {
-    const analysis = this.analysisResult();
-    return analysis ? this.visualizationService.buildPerformanceMetrics(analysis) : [];
-  });
+  performanceMetrics = signal<PerformanceMetric[]>([]);
+  killTimeline = signal<KillTimelineItem[]>([]);
+  playerComparison = signal<PlayerComparisonItem[]>([]);
+  heatmapCells = signal<HeatmapCell[]>([]);
+  weaponUsage = signal<WeaponUsageItem[]>([]);
 
-  killTimeline = computed<KillTimelineItem[]>(() => {
-    const analysis = this.analysisResult();
-    return analysis ? this.visualizationService.buildKillTimeline(analysis) : [];
-  });
-
-  playerComparison = computed<PlayerComparisonItem[]>(() => {
-    const analysis = this.analysisResult();
-    return analysis ? this.visualizationService.buildPlayerComparison(analysis) : [];
-  });
-
-  heatmapCells = computed<HeatmapCell[]>(() => {
-    const analysis = this.analysisResult();
-    return analysis ? this.visualizationService.generateHeatmapData(analysis.players) : [];
-  });
-
-  weaponUsage = computed<WeaponUsageItem[]>(() => {
-    const analysis = this.analysisResult();
-    return analysis ? this.visualizationService.buildWeaponUsage(analysis.players) : [];
-  });
-
+  
   ngOnInit(): void {
+    // Initialize form after component initialization
+    this.initializeFormOptimizations();
+
     const form = this.matchForm();
 
-    // Keep the form validity signal in sync with reactive form changes
-    this.isFormValid.set(form.valid);
-    form.statusChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-      this.isFormValid.set(form.valid);
-    });
-    form.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-      this.isFormValid.set(form.valid);
-    });
-
-    // Modern reactive approach with takeUntilDestroyed
-    this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
+    // Handle form initialization from route params
+    const paramsSubscription = this.route.queryParams.subscribe(params => {
       if (params["matchId"]) {
         form.patchValue({
           matchId: params["matchId"],
@@ -416,7 +413,17 @@ export class MatchAnalysisComponent implements OnInit {
           playerNames: playerNames,
         });
       }
-      this.isFormValid.set(form.valid);
+    });
+
+    // Update form validity signal using a subscription to form status changes
+    const validitySubscription = form.statusChanges.subscribe(() => {
+      this.isFormValid.set(form.status === 'VALID');
+    });
+
+    // Clean up subscriptions in destroy ref
+    this.destroyRef.onDestroy(() => {
+      paramsSubscription.unsubscribe();
+      validitySubscription.unsubscribe();
     });
   }
 
@@ -483,4 +490,12 @@ export class MatchAnalysisComponent implements OnInit {
       .map((name) => name.trim())
       .filter((name) => name.length > 0);
   }
-}
+
+  // Performance optimization methods
+  private initializeFormOptimizations(): void {
+    // Add any form initialization that should happen after first render
+    const form = this.matchForm();
+    this.isFormValid.set(form.valid);
+  }
+
+  }

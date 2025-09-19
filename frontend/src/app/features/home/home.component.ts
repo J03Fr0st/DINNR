@@ -1,5 +1,5 @@
-import { Component, signal, computed, inject } from "@angular/core";
-import { RouterModule, Router } from "@angular/router";
+import { Component, signal, computed } from "@angular/core";
+import { RouterModule } from "@angular/router";
 import { MatCardModule } from "@angular/material/card";
 import { MatButtonModule } from "@angular/material/button";
 import { MatIconModule } from "@angular/material/icon";

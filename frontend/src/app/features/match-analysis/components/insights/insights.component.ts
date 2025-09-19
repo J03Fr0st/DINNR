@@ -1,4 +1,4 @@
-import { Component, Input } from "@angular/core";
+import { Component, input } from "@angular/core";
 import type { AnalysisInsights } from "../../../../core/models/index";
 import { MatCardModule } from "@angular/material/card";
 import { MatChipsModule } from "@angular/material/chips";
@@ -15,7 +15,7 @@ import { CUSTOM_ELEMENTS_SCHEMA } from "@angular/core";
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class InsightsComponent {
-  @Input() insights: AnalysisInsights | null = null;
+  insights = input<AnalysisInsights | null>(null);
 
   getOverallQualityColor(rating: number): string {
     if (rating >= 4) return "excellent";

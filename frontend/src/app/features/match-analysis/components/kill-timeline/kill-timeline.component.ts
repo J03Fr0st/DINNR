@@ -1,4 +1,4 @@
-import { Component, Input } from "@angular/core";
+import { Component, input } from "@angular/core";
 import { CommonModule } from "@angular/common";
 
 interface TimelineItem {
@@ -11,11 +11,11 @@ interface TimelineItem {
 @Component({
   selector: "app-kill-timeline",
   template: `
-    <ng-container *ngIf="timelineData.length; else empty">
+    <ng-container *ngIf="timelineData().length; else empty">
       <div class="timeline-container">
         <h3>Key Match Moments</h3>
         <ul class="timeline">
-          <li *ngFor="let item of timelineData">
+          <li *ngFor="let item of timelineData()">
             <div class="timestamp">{{ item.time }}</div>
             <div class="details">
               <div class="description">{{ item.description }}</div>
@@ -102,5 +102,5 @@ interface TimelineItem {
   imports: [CommonModule],
 })
 export class KillTimelineComponent {
-  @Input() timelineData: TimelineItem[] = [];
+  timelineData = input<TimelineItem[]>([]);
 }

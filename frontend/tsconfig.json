@@ -22,12 +22,36 @@
       "ES2022",
       "dom"
     ],
-    "types": ["node"]
+    "types": ["node"],
+    // Additional strict options for Angular 20
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "exactOptionalPropertyTypes": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "allowSyntheticDefaultImports": true,
+    "allowJs": true,
+    "checkJs": false
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true,
-    "strictTemplates": true
+    "strictTemplates": true,
+    // Additional Angular 20 compiler optimizations
+    "fullTemplateTypeCheck": true,
+    "strictLiteralTypes": true,
+    "allowSyntheticDefaultImports": true,
+    "preserveWhitespaces": false,
+    "disableTypeScriptVersionCheck": true,
+    "enableResourceInlining": false
   }
 }

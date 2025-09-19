@@ -424,22 +424,17 @@ export class PlayerStatsComponent implements OnInit {
   }));
 
   ngOnInit(): void {
-    // Set up form change detection to update isFormValid signal
-    this.playerForm().valueChanges
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => {
-        this.isFormValid.set(this.playerForm().valid);
-      });
+    const form = this.playerForm();
 
-    // Also listen to status changes (for validation state changes)
-    this.playerForm().statusChanges
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => {
-        this.isFormValid.set(this.playerForm().valid);
-      });
+    // Update form validity using subscription
+    const validitySubscription = form.statusChanges.subscribe(() => {
+      this.isFormValid.set(form.status === 'VALID');
+    });
 
-    // Set initial validation state
-    this.isFormValid.set(this.playerForm().valid);
+    // Clean up subscription in destroy ref
+    this.destroyRef.onDestroy(() => {
+      validitySubscription.unsubscribe();
+    });
   }
 
   private createForm(): FormGroup {
